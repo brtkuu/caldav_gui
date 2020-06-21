@@ -2,9 +2,9 @@
   <div class="container">
     <div class="calendar">
       <div class="month">
-        <div class="back">back</div>
+        <div class="back" v-on:click="change(false)">back</div>
         <div class="monthLabel"></div>
-        <div class="next">next</div>
+        <div class="next" v-on:click="change(true)">next</div>
       </div>
       <div class="daysOfWeek">
         <div>Mon</div>
@@ -65,6 +65,26 @@ export default {
     setLabel() {
       const monthInfo = document.querySelector(".monthLabel");
       monthInfo.innerHTML = this.months[this.monthNumber] + " " + this.year;
+    },
+    change(direction) {
+      if (direction) {
+        if (this.monthNumber == 11) {
+          this.monthNumber = 0;
+          this.year++;
+        } else {
+          this.monthNumber++;
+        }
+      } else {
+        if (this.monthNumber == 0) {
+          this.monthNumber = 11;
+          this.year--;
+        } else {
+          this.monthNumber--;
+        }
+      }
+      document.querySelector(".dayOfMonth").innerHTML = "";
+      this.setLabel();
+      this.createTable();
     }
   },
   mounted() {
