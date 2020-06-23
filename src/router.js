@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue';
 import MonthView from './views/Month.vue';
+import WeekView from './views/Week.vue';
 
 Vue.use(Router)
 
@@ -17,5 +18,10 @@ export default new Router({
       name: 'monthview',
       component: MonthView
     },
+    {
+      path: '/week',
+      name: 'weekview',
+      component: WeekView
+    }
   ]
 })

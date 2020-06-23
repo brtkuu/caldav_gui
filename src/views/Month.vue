@@ -22,92 +22,102 @@
 </template>
 <script>
 export default {
-  name: "MonthView",
-  date() {
-    return {
-      currentDate: undefined,
-      months: undefined,
-      monthNumber: undefined,
-      year: undefined
-    };
-  },
-  methods: {
-    // drawing calendar table with correct days of week
-    createTable() {
-      for (let i = 1; i < 35; i++) {
-        const calendarElement = document.createElement("div");
-        const calendarElementLabel = document.createElement("p");
-        calendarElement.id = i;
-        calendarElementLabel.classList.add("dayLabel");
-        calendarElement.classList.add("day");
-        const d = new Date(
-          `${this.months[this.monthNumber]} ${i}, ${this.year}`
-        );
-        if (i == 1) {
-          if (!d.getDay()) {
-            calendarElement.style.gridColumn = 7;
-          } else {
-            calendarElement.style.gridColumn = d.getDay();
-          }
-        }
-        if (
-          d.getDay() + 1 &&
-          this.months[d.getMonth()] == this.months[this.monthNumber]
-        ) {
-          calendarElementLabel.innerHTML = i;
-          calendarElement.appendChild(calendarElementLabel);
-          document.querySelector(".dayOfMonth").appendChild(calendarElement);
-        } else {
-          break;
-        }
-      }
-    },
-    setLabel() {
-      const monthInfo = document.querySelector(".monthLabel");
-      monthInfo.innerHTML = this.months[this.monthNumber] + " " + this.year;
-    },
-    change(direction) {
-      if (direction) {
-        if (this.monthNumber == 11) {
-          this.monthNumber = 0;
-          this.year++;
-        } else {
-          this.monthNumber++;
-        }
-      } else {
-        if (this.monthNumber == 0) {
-          this.monthNumber = 11;
-          this.year--;
-        } else {
-          this.monthNumber--;
-        }
-      }
-      document.querySelector(".dayOfMonth").innerHTML = "";
-      this.setLabel();
-      this.createTable();
-    }
-  },
-  mounted() {
-    this.currentDate = new Date();
-    this.monthNumber = this.currentDate.getMonth();
-    this.year = this.currentDate.getFullYear();
-    (this.months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ]),
-      this.setLabel();
-    this.createTable();
-  }
+	name: "MonthView",
+	date() {
+		return {
+			currentDate: undefined,
+			months: undefined,
+			monthNumber: undefined,
+			year: undefined,
+		};
+	},
+	methods: {
+		// drawing calendar table with correct days of week
+		createTable() {
+			for (let i = 1; i < 31; i++) {
+				const calendarElement = document.createElement("div");
+				const calendarElementLabel = document.createElement("p");
+				calendarElement.id = i;
+				calendarElementLabel.classList.add("dayLabel");
+				calendarElement.classList.add("day");
+				const d = new Date(
+					`${this.months[this.monthNumber]} ${i}, ${this.year}`
+				);
+				if (
+					d.getMonth() == this.currentDate.getMonth() &&
+					d.getDate() == this.currentDate.getDate() &&
+					d.getFullYear() == this.currentDate.getFullYear()
+				) {
+					calendarElementLabel.classList.add("currentDate");
+				}
+				if (i == 1) {
+					if (!d.getDay()) {
+						calendarElement.style.gridColumn = 7;
+					} else {
+						calendarElement.style.gridColumn = d.getDay();
+					}
+				}
+				if (
+					d.getDay() + 1 &&
+					this.months[d.getMonth()] == this.months[this.monthNumber]
+				) {
+					calendarElementLabel.innerHTML = i;
+					calendarElement.appendChild(calendarElementLabel);
+					document
+						.querySelector(".dayOfMonth")
+						.appendChild(calendarElement);
+				} else {
+					break;
+				}
+			}
+		},
+		setLabel() {
+			const monthInfo = document.querySelector(".monthLabel");
+			monthInfo.innerHTML =
+				this.months[this.monthNumber] + " " + this.year;
+		},
+		change(direction) {
+			if (direction) {
+				if (this.monthNumber == 11) {
+					this.monthNumber = 0;
+					this.year++;
+				} else {
+					this.monthNumber++;
+				}
+			} else {
+				if (this.monthNumber == 0) {
+					this.monthNumber = 11;
+					this.year--;
+				} else {
+					this.monthNumber--;
+				}
+			}
+			document.querySelector(".dayOfMonth").innerHTML = "";
+			this.setLabel();
+			this.createTable();
+		},
+	},
+	mounted() {
+		this.currentDate = new Date();
+		this.monthNumber = this.currentDate.getMonth();
+		this.year = this.currentDate.getFullYear();
+		(this.months = [
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December",
+		]),
+			this.setLabel();
+		this.createTable();
+	},
 };
 </script>
 <style lang="css">
@@ -137,10 +147,8 @@ export default {
 }
 
 .month {
-  position: relative;
-  height: 50px;
-  width: 100%;
-  background-color: white;
+  display: flex;
+  justify-content: space-between;
 }
 
 .daysOfWeek {
@@ -150,6 +158,7 @@ export default {
   background-color: rgb(202, 202, 202);
   grid-gap: 5px;
   line-height: 30px;
+  text-align: center;
 }
 
 .day {
@@ -167,14 +176,20 @@ export default {
   width: 25px;
   line-height: 25px;
   text-align: center;
-  border: 1px solid black;
+  border: 2px solid rgb(0, 0, 0);
   border-radius: 20px;
+  opacity: 0.5;
 }
 
 .day:hover .dayLabel {
   background-color: rgb(155, 155, 155);
+  opacity: 1;
 }
-
+.currentDate{
+  color: white;
+  background-color: red;
+  opacity: 1;
+}
 .next {
   cursor: pointer;
   text-align: center;

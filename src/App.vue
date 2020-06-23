@@ -1,29 +1,30 @@
 <template>
   <div id="app">
-    <router-link to="/">Home</router-link>
-    <router-link to="/month">Months</router-link>
+    <header>
+      <router-link to="/" exact>Home</router-link>
+      <span>&nbsp;|&nbsp;</span>
+      <router-link to="/month" exact>Months</router-link>
+      <span>&nbsp;|&nbsp;</span>
+      <router-link to="/week" exact>Week</router-link>
+    </header>
     <router-view />
   </div>
 </template>
 
-<style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<style scoped>
+* {
+	font-family: "Nova Square", cursive;
 }
-#nav {
-  padding: 30px;
+header {
+	font-size: 30px;
+	background-color: rgb(189, 189, 189);
+	text-align: center;
 }
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+header a {
+	text-decoration: none;
+	color: black;
 }
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+.router-link-active {
+	font-weight: 900;
 }
 </style>
