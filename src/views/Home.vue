@@ -7,6 +7,6 @@
 import { ipcRenderer } from "electron";
 
 export default {
-  name: "home"
+	name: "home",
 };
 </script>

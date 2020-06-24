@@ -1,8 +1,15 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain } from "electron";
+import {
+	app,
+	protocol,
+	BrowserWindow,
+	ipcMain
+} from "electron";
 import * as path from "path";
-import { format as formatUrl } from "url";
+import {
+	format as formatUrl
+} from "url";
 import {
 	createProtocol,
 	installVueDevtools,
@@ -24,8 +31,8 @@ protocol.registerStandardSchemes(["app"], {
 
 function createMainWindow() {
 	const window = new BrowserWindow({
-		minWidth: 560,
-		minHeight: 575,
+		minWidth: 900,
+		minHeight: 700,
 	});
 
 	if (isDevelopment) {

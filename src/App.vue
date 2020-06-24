@@ -1,25 +1,17 @@
 <template>
   <div id="app">
-    <!-- <header>
+    <header>
       <router-link to="/" exact>Home</router-link>
       <span>&nbsp;|&nbsp;</span>
       <router-link to="/month" exact>Months</router-link>
       <span>&nbsp;|&nbsp;</span>
-      <router-link to="/week" exact>Week</router-link>
+      <router-link to="/day" exact>Day</router-link>
     </header>
-    <router-view /> -->
-<vue-cal></vue-cal>
+    <router-view />
   </div>
 </template>
-<script>
-import VueCal from "vue-cal";
-import "vue-cal/dist/vuecal.css";
 
-export default {
-	components: { "vue-cal": VueCal },
-};
-</script>
-<style scoped>
+<style >
 * {
 	font-family: "Nova Square", cursive;
 }

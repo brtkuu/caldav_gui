@@ -1,10 +1,10 @@
 <template>
   <div class="container">
-    <div class="calendar">
+    <div class="calendar" v-if="!this.$store.state.dayView">
       <div class="month">
-        <div class="back" v-on:click="change(false)">back</div>
+        <div class="back" @click="change(false)">back</div>
         <div class="monthLabel"></div>
-        <div class="next" v-on:click="change(true)">next</div>
+        <div class="next" @click="change(true)">next</div>
       </div>
       <div class="daysOfWeek">
         <div>Mon</div>
@@ -15,12 +15,13 @@
         <div>Sat</div>
         <div>Sun</div>
       </div>
-      <div class="dayOfMonth"></div>
+      <div class="dayOfMonth" @click="clicked"></div>
     </div>
-    <div class="info"></div>
   </div>
 </template>
 <script>
+import Router from "vue-router";
+
 export default {
 	name: "MonthView",
 	date() {
@@ -41,12 +42,15 @@ export default {
 				calendarElementLabel.classList.add("dayLabel");
 				calendarElement.classList.add("day");
 				const d = new Date(
-					`${this.months[this.monthNumber]} ${i}, ${this.year}`
+					`${this.months[this.$store.state.currentMonth]} ${i}, ${
+						this.$store.state.currentYear
+					}`
 				);
 				if (
-					d.getMonth() == this.currentDate.getMonth() &&
-					d.getDate() == this.currentDate.getDate() &&
-					d.getFullYear() == this.currentDate.getFullYear()
+					d.getMonth() == this.$store.state.currentDate.getMonth() &&
+					d.getDate() == this.$store.state.currentDate.getDate() &&
+					d.getFullYear() ==
+						this.$store.state.currentDate.getFullYear()
 				) {
 					calendarElementLabel.classList.add("currentDate");
 				}
@@ -59,7 +63,8 @@ export default {
 				}
 				if (
 					d.getDay() + 1 &&
-					this.months[d.getMonth()] == this.months[this.monthNumber]
+					this.months[d.getMonth()] ==
+						this.months[this.$store.state.currentMonth]
 				) {
 					calendarElementLabel.innerHTML = i;
 					calendarElement.appendChild(calendarElementLabel);
@@ -74,33 +79,38 @@ export default {
 		setLabel() {
 			const monthInfo = document.querySelector(".monthLabel");
 			monthInfo.innerHTML =
-				this.months[this.monthNumber] + " " + this.year;
+				this.months[this.$store.state.currentMonth] +
+				" " +
+				this.$store.state.currentYear;
 		},
 		change(direction) {
 			if (direction) {
-				if (this.monthNumber == 11) {
-					this.monthNumber = 0;
-					this.year++;
+				if (this.$store.state.currentMonth == 11) {
+					this.$store.state.currentMonth = 0;
+					this.$store.state.currentYear++;
 				} else {
-					this.monthNumber++;
+					this.$store.state.currentMonth++;
 				}
 			} else {
-				if (this.monthNumber == 0) {
-					this.monthNumber = 11;
-					this.year--;
+				if (this.$store.state.currentMonth == 0) {
+					this.$store.state.currentMonth = 11;
+					this.$store.state.currentYear--;
 				} else {
-					this.monthNumber--;
+					this.$store.state.currentMonth--;
 				}
 			}
 			document.querySelector(".dayOfMonth").innerHTML = "";
 			this.setLabel();
 			this.createTable();
 		},
+		clicked() {
+			this.$store.state.clickedDate = event.target.id;
+			this.$router.push({ name: "dayview" });
+		},
 	},
 	mounted() {
-		this.currentDate = new Date();
-		this.monthNumber = this.currentDate.getMonth();
-		this.year = this.currentDate.getFullYear();
+		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
+		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
 		(this.months = [
 			"January",
 			"February",
@@ -165,7 +175,7 @@ export default {
   cursor: pointer;
   border-bottom: 1px solid black;
   border-right: 1px solid black;
-  height: 80px;
+  height: 150px;
   padding: 3px;
   background-color: rgb(190, 190, 190);
 }
