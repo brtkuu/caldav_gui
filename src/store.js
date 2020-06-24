@@ -16,6 +16,8 @@ export default new Vuex.Store({
     currentYear: undefined,
     dayView: false,
     clickedDate: undefined,
+    clickedMonth: undefined,
+    clickedYear: undefined,
     months: [
       "January",
       "February",
@@ -31,7 +33,26 @@ export default new Vuex.Store({
       "December",
     ],
   },
-  mutations: {},
+  mutations: {
+    incrementMonth(state) {
+      state.currentMonth++
+    },
+    incrementYear(state) {
+      state.currentYear++
+    },
+    decrementMonth(state) {
+      state.currentMonth--
+    },
+    decrementYear(state) {
+      state.currentYear--
+    },
+    incrementClkDay(state) {
+      state.clickedDate++
+    },
+    decrementClkDay(state) {
+      state.clickedDate--
+    },
+  },
   actions: {},
   getters: {},
 });

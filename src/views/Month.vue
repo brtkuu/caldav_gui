@@ -39,6 +39,7 @@ export default {
 				const calendarElement = document.createElement("div");
 				const calendarElementLabel = document.createElement("p");
 				calendarElement.id = i;
+				calendarElementLabel.id = i;
 				calendarElementLabel.classList.add("dayLabel");
 				calendarElement.classList.add("day");
 				const d = new Date(
@@ -87,16 +88,16 @@ export default {
 			if (direction) {
 				if (this.$store.state.currentMonth == 11) {
 					this.$store.state.currentMonth = 0;
-					this.$store.state.currentYear++;
+					this.$store.commit("incrementYear");
 				} else {
-					this.$store.state.currentMonth++;
+					this.$store.commit("incrementMonth");
 				}
 			} else {
 				if (this.$store.state.currentMonth == 0) {
 					this.$store.state.currentMonth = 11;
-					this.$store.state.currentYear--;
+					this.$store.commit("decrementYear");
 				} else {
-					this.$store.state.currentMonth--;
+					this.$store.commit("decrementMonth");
 				}
 			}
 			document.querySelector(".dayOfMonth").innerHTML = "";
@@ -105,12 +106,13 @@ export default {
 		},
 		clicked() {
 			this.$store.state.clickedDate = event.target.id;
+			this.$store.state.clickedMonth = this.$store.state.currentMonth;
+			this.$store.state.clickedYear = this.$store.state.currentYear;
 			this.$router.push({ name: "dayview" });
 		},
 	},
 	mounted() {
-		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
-		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
+		console.log("mounted");
 		(this.months = [
 			"January",
 			"February",
@@ -127,6 +129,9 @@ export default {
 		]),
 			this.setLabel();
 		this.createTable();
+	},
+	created() {
+		console.log("created");
 	},
 };
 </script>

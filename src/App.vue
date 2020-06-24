@@ -10,7 +10,15 @@
     <router-view />
   </div>
 </template>
-
+<script>
+export default {
+	name: "App",
+	mounted() {
+		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
+		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
+	},
+};
+</script>
 <style >
 * {
 	font-family: "Nova Square", cursive;
