@@ -5,7 +5,7 @@
     {{ this.$store.state.clickedDate != undefined
 				? this.$store.state.clickedDate
 				: this.$store.state.today.getDate() }}
-                 {{ this.$store.state.clickedMonth != undefined ? this.$store.state.months[this.$store.state.clickedMonth] : this.$store.state.months[this.$store.state.today.getMonth()] }} {{ this.$store.state.clickedYear != undefined ? this.$store.state.clickedYear : this.$store.state.today.getFullYear()}}
+                 {{ this.$store.state.clickedMonth != undefined ? this.$store.state.months[this.$store.state.clickedMonth] : this.$store.state.months[this.$store.state.currentMonth] }} {{ this.$store.state.clickedYear != undefined ? this.$store.state.clickedYear : this.$store.state.today.getFullYear()}}
     </p>
 </div>
 </template>
