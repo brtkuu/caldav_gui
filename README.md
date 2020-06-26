@@ -1,2 +1,3 @@
 # CalDAV GUI
 
+GUI client
