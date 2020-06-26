@@ -23,116 +23,108 @@
 import Router from "vue-router";
 
 export default {
-	name: "MonthView",
-	date() {
-		return {
-			currentDate: undefined,
-			months: undefined,
-			monthNumber: undefined,
-			year: undefined,
-		};
-	},
-	methods: {
-		// drawing calendar table with correct days of week
-		createTable() {
-			for (let i = 1; i < 31; i++) {
-				const calendarElement = document.createElement("div");
-				const calendarElementLabel = document.createElement("p");
-				calendarElement.id = i;
-				calendarElementLabel.id = i;
-				calendarElementLabel.classList.add("dayLabel");
-				calendarElement.classList.add("day");
-				const d = new Date(
-					`${this.months[this.$store.state.currentMonth]} ${i}, ${
-						this.$store.state.currentYear
-					}`
-				);
-				if (
-					d.getMonth() == this.$store.state.currentDate.getMonth() &&
-					d.getDate() == this.$store.state.currentDate.getDate() &&
-					d.getFullYear() ==
-						this.$store.state.currentDate.getFullYear()
-				) {
-					calendarElementLabel.classList.add("currentDate");
-				}
-				if (i == 1) {
-					if (!d.getDay()) {
-						calendarElement.style.gridColumn = 7;
-					} else {
-						calendarElement.style.gridColumn = d.getDay();
-					}
-				}
-				if (
-					d.getDay() + 1 &&
-					this.months[d.getMonth()] ==
-						this.months[this.$store.state.currentMonth]
-				) {
-					calendarElementLabel.innerHTML = i;
-					calendarElement.appendChild(calendarElementLabel);
-					document
-						.querySelector(".dayOfMonth")
-						.appendChild(calendarElement);
-				} else {
-					break;
-				}
-			}
-		},
-		setLabel() {
-			const monthInfo = document.querySelector(".monthLabel");
-			monthInfo.innerHTML =
-				this.months[this.$store.state.currentMonth] +
-				" " +
-				this.$store.state.currentYear;
-		},
-		change(direction) {
-			if (direction) {
-				if (this.$store.state.currentMonth == 11) {
-					this.$store.state.currentMonth = 0;
-					this.$store.commit("incrementYear");
-				} else {
-					this.$store.commit("incrementMonth");
-				}
-			} else {
-				if (this.$store.state.currentMonth == 0) {
-					this.$store.state.currentMonth = 11;
-					this.$store.commit("decrementYear");
-				} else {
-					this.$store.commit("decrementMonth");
-				}
-			}
-			document.querySelector(".dayOfMonth").innerHTML = "";
-			this.setLabel();
-			this.createTable();
-		},
-		clicked() {
-			this.$store.state.clickedDate = event.target.id;
-			this.$store.state.clickedMonth = this.$store.state.currentMonth;
-			this.$store.state.clickedYear = this.$store.state.currentYear;
-			this.$router.push({ name: "dayview" });
-		},
-	},
-	mounted() {
-		console.log("mounted");
-		(this.months = [
-			"January",
-			"February",
-			"March",
-			"April",
-			"May",
-			"June",
-			"July",
-			"August",
-			"September",
-			"October",
-			"November",
-			"December",
-		]),
-			this.setLabel();
-		this.createTable();
-	},
-	created() {
-		console.log("created");
-	},
+  name: "MonthView",
+  date() {
+    return {
+      currentDate: undefined,
+      months: undefined,
+      monthNumber: undefined,
+      year: undefined
+    };
+  },
+  methods: {
+    // drawing calendar table with correct days of week
+    createTable() {
+      for (let i = 1; i < 32; i++) {
+        const calendarElement = document.createElement("div");
+        const calendarElementLabel = document.createElement("p");
+        calendarElement.id = i;
+        calendarElementLabel.id = i;
+        calendarElementLabel.classList.add("dayLabel");
+        calendarElement.classList.add("day");
+        const d = new Date(
+          `${this.months[this.$store.state.currentMonth]} ${i}, ${
+            this.$store.state.currentYear
+          }`
+        );
+        if (i == 1) {
+          if (!d.getDay()) {
+            calendarElement.style.gridColumn = 7;
+          } else {
+            calendarElement.style.gridColumn = d.getDay();
+          }
+        }
+        if (
+          d.getDay() + 1 &&
+          this.months[d.getMonth()] ==
+            this.months[this.$store.state.currentMonth]
+        ) {
+          calendarElementLabel.innerHTML = i;
+          calendarElement.appendChild(calendarElementLabel);
+          document.querySelector(".dayOfMonth").appendChild(calendarElement);
+        } else {
+          break;
+        }
+      }
+    },
+    setLabel() {
+      const monthInfo = document.querySelector(".monthLabel");
+      monthInfo.innerHTML =
+        this.months[this.$store.state.currentMonth] +
+        " " +
+        this.$store.state.currentYear;
+    },
+    change(direction) {
+      if (direction) {
+        if (this.$store.state.currentMonth == 11) {
+          this.$store.state.currentMonth = 0;
+          this.$store.commit("incrementYear");
+        } else {
+          this.$store.commit("incrementMonth");
+        }
+      } else {
+        if (this.$store.state.currentMonth == 0) {
+          this.$store.state.currentMonth = 11;
+          this.$store.commit("decrementYear");
+        } else {
+          this.$store.commit("decrementMonth");
+        }
+      }
+      document.querySelector(".dayOfMonth").innerHTML = "";
+      this.setLabel();
+      this.createTable();
+    },
+    clicked() {
+      const month = document.querySelector(".monthLabel").innerText;
+      const monthArr = month.split(" ");
+      this.$store.state.currentMonth = this.$store.state.months.indexOf(
+        monthArr[0]
+      );
+      console.log(this.$store.state.currentMonth);
+      this.$store.state.clickedDate = event.target.id;
+      this.$store.state.clickedYear = this.$store.state.currentYear;
+      this.$router.push({ name: "dayview" });
+    }
+  },
+  mounted() {
+    console.log("mounted");
+    (this.months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ]),
+      this.setLabel();
+    this.createTable();
+  }
 };
 </script>
 <style lang="css">
@@ -200,7 +192,7 @@ export default {
   background-color: rgb(155, 155, 155);
   opacity: 1;
 }
-.currentDate{
+.currentDate {
   color: white;
   background-color: red;
   opacity: 1;

@@ -58,7 +58,12 @@ export default new Vuex.Store({
 			);
 			if (a.getMonth() != d.getMonth()) {
 				state.clickedDate = 1;
-				state.currentMonth++;
+				if (state.currentMonth == 11) {
+					state.currentMonth = 0;
+					state.currentYear++;
+				} else {
+					state.currentMonth++;
+				}
 				state.clickedMonth = state.currentMonth;
 				console.log(state.clickedMonth);
 				console.log(state.currentMonth);
@@ -77,9 +82,17 @@ export default new Vuex.Store({
 					state.currentYear
 				}`
 			);
-			console.log(a);
 			if (a.getMonth() != d.getMonth()) {
-				state.currentMonth--;
+				console.log(state.currentMonth);
+				if (state.currentMonth == 0) {
+					console.log("zero");
+					state.currentMonth = 11;
+					state.clickedMonth = 11;
+					state.currentYear--;
+					state.clickedYear--;
+				} else {
+					state.currentMonth--;
+				}
 				state.clickedDate =
 					32 -
 					new Date(
