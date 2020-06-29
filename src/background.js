@@ -1,19 +1,14 @@
 "use strict";
 
-import {
-	app,
-	protocol,
-	BrowserWindow,
-	ipcMain
-} from "electron";
+import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
-import {
-	format as formatUrl
-} from "url";
+import { format as formatUrl } from "url";
 import {
 	createProtocol,
 	installVueDevtools,
 } from "vue-cli-plugin-electron-builder/lib";
+import { exec } from "child_process";
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 if (isDevelopment) {
 	// Don't load any native (external) modules until the following line is run:
@@ -105,4 +100,15 @@ app.on("ready", async () => {
 		await installVueDevtools();
 	}
 	mainWindow = createMainWindow();
+});
+
+ipcMain.on("syncCalendar", (event, data) => {
+	exec("vdirsyncer sync", (err, stdout, stderr) => {
+		if (err) {
+			console.error(err);
+			throw err;
+		} else {
+			console.log("Synchronized calendar!");
+		}
+	});
 });
