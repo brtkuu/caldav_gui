@@ -9,6 +9,10 @@ import {
 } from "vue-cli-plugin-electron-builder/lib";
 import { exec } from "child_process";
 
+import uid from "uid";
+
+const fs = require("fs");
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 if (isDevelopment) {
 	// Don't load any native (external) modules until the following line is run:
@@ -44,6 +48,7 @@ function createMainWindow() {
 				slashes: true,
 			})
 		);
+		window.loadURL("https://vuejs.org/v2/guide/transitions.html");
 	}
 
 	window.on("closed", () => {
@@ -111,4 +116,23 @@ ipcMain.on("syncCalendar", (event, data) => {
 			console.log("Synchronized calendar!");
 		}
 	});
+});
+
+ipcMain.on("createEvent", (event, data) => {
+	const ID = uid(16).toUpperCase();
+	const newEvent = `BEGIN:VCALENDAR\nPRODID:-//Nextcloud calendar v1.6.5\nVERSION:2.0\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nUID:${ID}\nSUMMARY:${
+		data.title
+	}\nDESCRIPTION:${data.description}\nLOCATION:${
+		data.location
+	}\nCLASS:PUBLIC\nDTSTART;VALUE=DATE:${data.start[0]}${
+		data.start[1] >= 10 ? data.start[1] : "0" + data.start[1]
+	}${
+		data.start[2] >= 10 ? data.start[2] : "0" + data.start[2]
+	}\nDTEND;VALUE=DATE:${data.start[0]}${
+		data.end[1] >= 10 ? data.end[1] : "0" + data.end[1]
+	}${
+		data.end[2] >= 10 ? data.end[2] : "0" + data.end[2]
+	}\nEND:VEVENT\nEND:VCALENDAR`;
+
+	fs.writeFile(`/usr/local/Cellar/calendar/bartek/${ID}.ics`, newEvent);
 });

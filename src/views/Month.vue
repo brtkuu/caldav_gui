@@ -102,9 +102,9 @@ export default {
 			this.$store.state.currentMonth = this.$store.state.months.indexOf(
 				monthArr[0]
 			);
-			console.log(this.$store.state.currentMonth);
 			this.$store.state.clickedDate = event.target.id;
-			this.$store.state.clickedYear = this.$store.state.currentYear;
+			this.$store.state.currtentYear = this.$store.state.currentYear;
+			console.log(this.$store.state.currentMonth);
 			this.$router.push({ name: "dayview" });
 		},
 	},
@@ -126,6 +126,7 @@ export default {
 		]),
 			this.setLabel();
 		this.createTable();
+		this.$store.commit("closeAddEventView");
 	},
 };
 </script>

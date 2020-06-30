@@ -32,6 +32,7 @@ export default new Vuex.Store({
 			"November",
 			"December",
 		],
+		addEventModal: false,
 	},
 	mutations: {
 		incrementMonth(state) {
@@ -108,6 +109,12 @@ export default new Vuex.Store({
 					(state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
+		},
+		openAddEventView(state) {
+			state.addEventModal = true;
+		},
+		closeAddEventView(state) {
+			state.addEventModal = false;
 		},
 	},
 	actions: {},

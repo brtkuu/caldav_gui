@@ -1,0 +1,113 @@
+<template>
+  <div class="container">
+    <form action>
+      <label for="title">Title:</label>
+      <input type="text" name="title" id="title" />
+      <br />
+      <label for="allday">All day event:</label> Yes
+      <input type="checkbox" name="allday" id="alldayyes" /> No
+      <input type="checkbox" name="allday" id="alldayno" />
+      <br />
+      <label for="start">Start hour:</label>
+      <input type="time" name="start" id="start" />
+      <label for="end">End hour:</label>
+      <input type="time" name="end" id="end" />
+      <label for="description">
+        Description:
+        <br />
+      </label>
+      <textarea name="description" id="description" cols="70" rows="5"></textarea>
+      <label for="location">Location:</label>
+      <input type="text" name="location" id="location" />
+    </form>
+    <button @click="addEvent()">Add</button>
+    <div @click="closeAddView" class="close"></div>
+  </div>
+  </template>
+<script>
+import { ipcRenderer } from "electron";
+
+export default {
+	name: "AddEvent",
+	methods: {
+		addEvent() {
+			const inputs = document.querySelectorAll("input");
+			const startHour = inputs[3].value.split(":");
+			const endHour = inputs[4].value.split(":");
+			const event = {
+				start: [
+					this.$store.state.currentYear,
+					this.$store.state.currentMonth + 1,
+					this.$store.state.clickedDate * 1,
+					startHour[0] * 1,
+					startHour[1] * 1,
+				],
+				end: [
+					this.$store.state.currentYear,
+					this.$store.state.currentMonth + 1,
+					this.$store.state.clickedDate * 1,
+					endHour[0] * 1,
+					endHour[1] * 1,
+				],
+				title: inputs[0].value,
+				description: document.querySelector("textarea").value,
+				location: inputs[5].value,
+			};
+			ipcRenderer.send("createEvent", event);
+		},
+		closeAddView() {
+			this.$store.commit("closeAddEventView");
+		},
+	},
+};
+</script>
+<style scoped>
+.container {
+	width: 400px;
+	height: 400px;
+	border: 1px solid;
+	background-color: #fff;
+}
+label {
+	line-height: 30px;
+}
+form {
+	font-size: 20px;
+	margin: 35px 5px 10px 10px;
+}
+#title {
+	width: 250px;
+}
+#description {
+	margin-left: auto;
+	margin-right: auto;
+	overflow: scroll;
+	resize: none;
+}
+.close {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	width: 32px;
+	height: 32px;
+	opacity: 0.3;
+}
+.close:hover {
+	opacity: 1;
+}
+.close:before,
+.close:after {
+	position: absolute;
+	left: 15px;
+	content: " ";
+	height: 33px;
+	width: 2px;
+	background-color: #333;
+}
+.close:before {
+	transform: rotate(45deg);
+}
+.close:after {
+	transform: rotate(-45deg);
+}
+</style>
