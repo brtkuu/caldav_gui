@@ -33,11 +33,13 @@ export default {
 		},
 	},
 	mounted() {
+		ipcRenderer.send("syncCalendar");
+		ipcRenderer.send("calendarStarted");
+		ipcRenderer.on("got-data", (event, data) => {
+			this.$store.state.events.push(data);
+		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
-		ipcRenderer.on("calSync", (event, data) => {
-			console.log(data);
-		});
 	},
 };
 </script>

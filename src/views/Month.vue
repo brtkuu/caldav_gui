@@ -54,13 +54,29 @@ export default {
 						calendarElement.style.gridColumn = d.getDay();
 					}
 				}
+
+				calendarElementLabel.innerHTML = i;
+				calendarElement.appendChild(calendarElementLabel);
+				this.$store.state.events.forEach((ele) => {
+					const eventDate = new Date(
+						ele[`${Object.keys(ele)[0]}`].start
+					);
+					if (
+						eventDate.getDate() == d.getDate() &&
+						eventDate.getMonth() == d.getMonth()
+					) {
+						const eventText = document.createElement("p");
+						eventText.innerHTML =
+							ele[`${Object.keys(ele)[0]}`].summary;
+						calendarElement.appendChild(eventText);
+					}
+				});
+
 				if (
 					d.getDay() + 1 &&
 					this.months[d.getMonth()] ==
 						this.months[this.$store.state.currentMonth]
 				) {
-					calendarElementLabel.innerHTML = i;
-					calendarElement.appendChild(calendarElementLabel);
 					document
 						.querySelector(".dayOfMonth")
 						.appendChild(calendarElement);
@@ -106,6 +122,10 @@ export default {
 			this.$store.state.currtentYear = this.$store.state.currentYear;
 			console.log(this.$store.state.currentMonth);
 			this.$router.push({ name: "dayview" });
+		},
+		compareDate(date1, date2) {
+			console.log(date1);
+			console.log(date2);
 		},
 	},
 	mounted() {

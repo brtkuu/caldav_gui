@@ -23,7 +23,7 @@
     <button @click="addEvent()">Add</button>
     <div @click="closeAddView" class="close"></div>
   </div>
-  </template>
+</template>
 <script>
 import { ipcRenderer } from "electron";
 
@@ -54,6 +54,7 @@ export default {
 				location: inputs[5].value,
 			};
 			ipcRenderer.send("createEvent", event);
+			this.$store.commit("closeAddEventView");
 		},
 		closeAddView() {
 			this.$store.commit("closeAddEventView");
@@ -67,6 +68,9 @@ export default {
 	height: 400px;
 	border: 1px solid;
 	background-color: #fff;
+}
+input {
+	font-size: 20px;
 }
 label {
 	line-height: 30px;

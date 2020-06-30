@@ -2,9 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 var fs = require("fs");
 
-import {
-	ipcRenderer
-} from "electron";
+import { ipcRenderer } from "electron";
 
 Vue.use(Vuex);
 
@@ -33,6 +31,7 @@ export default new Vuex.Store({
 			"December",
 		],
 		addEventModal: false,
+		events: [],
 	},
 	mutations: {
 		incrementMonth(state) {
@@ -103,10 +102,9 @@ export default new Vuex.Store({
 						state.currentMonth,
 						32
 					).getDate();
-				state.clickedMonth != undefined ?
-					state.clickedMonth--
-					:
-					(state.clickedMonth = state.currentMonth);
+				state.clickedMonth != undefined
+					? state.clickedMonth--
+					: (state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
 		},

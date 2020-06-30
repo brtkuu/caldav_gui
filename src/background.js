@@ -11,7 +11,11 @@ import { exec } from "child_process";
 
 import uid from "uid";
 
+const ical = require("node-ical");
 const fs = require("fs");
+const util = require("util");
+
+const readdir = util.promisify(fs.readdir);
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 if (isDevelopment) {
@@ -65,24 +69,6 @@ function createMainWindow() {
 	return window;
 }
 
-function createTaskWindow() {
-	const window = new BrowserWindow({
-		width: 300,
-		height: 200,
-	});
-
-	if (isDevelopment) {
-		// Load the url of the dev server if in development mode
-		window.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "/#/task");
-	}
-
-	window.on("closed", () => {
-		taskWindow = null;
-	});
-
-	return window;
-}
-
 // quit application when all windows are closed
 app.on("window-all-closed", () => {
 	// on macOS it is common for applications to stay open until the user explicitly quits
@@ -105,8 +91,17 @@ app.on("ready", async () => {
 		await installVueDevtools();
 	}
 	mainWindow = createMainWindow();
-});
 
+	exec("vdirsyncer sync", (err, stdout, stderr) => {
+		if (err) {
+			console.error(err);
+			throw err;
+		} else {
+			console.log("Synchronized calendar!");
+		}
+	});
+});
+//Response on ipcRenderer.send
 ipcMain.on("syncCalendar", (event, data) => {
 	exec("vdirsyncer sync", (err, stdout, stderr) => {
 		if (err) {
@@ -136,3 +131,29 @@ ipcMain.on("createEvent", (event, data) => {
 
 	fs.writeFile(`/usr/local/Cellar/calendar/bartek/${ID}.ics`, newEvent);
 });
+
+ipcMain.on("calendarStarted", (event, data) => {
+	async function myF() {
+		let names;
+		try {
+			names = await readdir("/usr/local/Cellar/calendar/bartek/");
+		} catch (err) {
+			console.log(err);
+		}
+		if (names === undefined) {
+			console.log("undefined");
+		} else {
+			names.forEach((file) => {
+				ical.async
+					.parseFile(`/usr/local/Cellar/calendar/bartek/${file}`)
+					.then((res) => {
+						event.sender.send("got-data", res);
+					});
+			});
+		}
+	}
+
+	myF();
+});
+
+//functions
