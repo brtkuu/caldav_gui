@@ -37,6 +37,7 @@ export default {
 		ipcRenderer.send("calendarStarted");
 		ipcRenderer.on("got-data", (event, data) => {
 			this.$store.state.events.push(data);
+			console.log(data.summary);
 		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();

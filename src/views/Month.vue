@@ -1,6 +1,6 @@
 <template>
   <div class="container" v-on:today="createTable">
-    <div class="calendar" v-if="!this.$store.state.dayView">
+    <div class="calendar">
       <div class="month">
         <div class="back" @click="change(false)">back</div>
         <div class="monthLabel"></div>
@@ -34,6 +34,9 @@ export default {
 	},
 	methods: {
 		// drawing calendar table with correct days of week
+		zeroPad(num, places) {
+			String(num).padStart(places, "0");
+		},
 		createTable() {
 			for (let i = 1; i < 32; i++) {
 				const calendarElement = document.createElement("div");
@@ -57,18 +60,11 @@ export default {
 
 				calendarElementLabel.innerHTML = i;
 				calendarElement.appendChild(calendarElementLabel);
-				this.$store.state.events.forEach((ele) => {
-					const eventDate = new Date(
-						ele[`${Object.keys(ele)[0]}`].start
-					);
-					if (
-						eventDate.getDate() == d.getDate() &&
-						eventDate.getMonth() == d.getMonth()
-					) {
-						const eventText = document.createElement("p");
-						eventText.innerHTML =
-							ele[`${Object.keys(ele)[0]}`].summary;
-						calendarElement.appendChild(eventText);
+				this.$store.state.events.forEach((ele, index) => {
+					const event = this.dispEvent(ele, d);
+					if (event) {
+						event.id = index;
+						calendarElement.appendChild(event);
 					}
 				});
 
@@ -119,13 +115,47 @@ export default {
 				monthArr[0]
 			);
 			this.$store.state.clickedDate = event.target.id;
-			this.$store.state.currtentYear = this.$store.state.currentYear;
-			console.log(this.$store.state.currentMonth);
+			this.$store.state.currentYear = monthArr[1] * 1;
 			this.$router.push({ name: "dayview" });
 		},
-		compareDate(date1, date2) {
-			console.log(date1);
-			console.log(date2);
+		dispEvent(ele, d) {
+			const eventDateStart = new Date(ele.start);
+			const eventDateEnd = new Date(ele.end);
+			if (
+				eventDateStart.getDate() == d.getDate() &&
+				eventDateStart.getMonth() == d.getMonth() &&
+				eventDateStart.getFullYear() == d.getFullYear()
+			) {
+				const eventLabel = document.createElement("p");
+				const endHour =
+					eventDateEnd.getHours() != 0
+						? eventDateEnd.getHours()
+						: "0" + eventDateEnd.getHours();
+				const endMinutes =
+					eventDateEnd.getMinutes() == 2
+						? eventDateEnd.getMinutes()
+						: "0" + eventDateEnd.getMinutes();
+
+				const startHour =
+					eventDateStart.getHours() != 0
+						? eventDateStart.getHours()
+						: "0" + eventDateStart.getHours();
+				const startMinutes =
+					eventDateStart.getMinutes() == 2
+						? eventDateStart.getMinutes()
+						: "0" + eventDateStart.getMinutes();
+
+				eventLabel.innerHTML = `${
+					startHour &&
+					startMinutes &&
+					(startHour != endHour || startMinutes != endMinutes)
+						? startHour + ":" + startMinutes
+						: ""
+				} ${ele.summary}`;
+				eventLabel.classList.add("eventLabel");
+				return eventLabel;
+			}
+			return null;
 		},
 	},
 	mounted() {
@@ -245,5 +275,8 @@ export default {
   display: inline-block;
   width: 490px;
   line-height: 50px;
+}
+.eventLabel{
+	font-size: 15px;
 }
 </style>

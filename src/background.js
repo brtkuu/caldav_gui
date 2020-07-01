@@ -11,7 +11,9 @@ import { exec } from "child_process";
 
 import uid from "uid";
 
-const ical = require("node-ical");
+const fromEntries = require("object.fromentries");
+
+const ical = require("ical");
 const fs = require("fs");
 const util = require("util");
 
@@ -91,26 +93,11 @@ app.on("ready", async () => {
 		await installVueDevtools();
 	}
 	mainWindow = createMainWindow();
-
-	exec("vdirsyncer sync", (err, stdout, stderr) => {
-		if (err) {
-			console.error(err);
-			throw err;
-		} else {
-			console.log("Synchronized calendar!");
-		}
-	});
+	syncCalendar();
 });
 //Response on ipcRenderer.send
 ipcMain.on("syncCalendar", (event, data) => {
-	exec("vdirsyncer sync", (err, stdout, stderr) => {
-		if (err) {
-			console.error(err);
-			throw err;
-		} else {
-			console.log("Synchronized calendar!");
-		}
-	});
+	syncCalendar();
 });
 
 ipcMain.on("createEvent", (event, data) => {
@@ -144,11 +131,10 @@ ipcMain.on("calendarStarted", (event, data) => {
 			console.log("undefined");
 		} else {
 			names.forEach((file) => {
-				ical.async
-					.parseFile(`/usr/local/Cellar/calendar/bartek/${file}`)
-					.then((res) => {
-						event.sender.send("got-data", res);
-					});
+				const data = ical.parseFile(
+					`/usr/local/Cellar/calendar/bartek/${file}`
+				);
+				event.sender.send("got-data", data[Object.keys(data)[0]]);
 			});
 		}
 	}
@@ -157,3 +143,11 @@ ipcMain.on("calendarStarted", (event, data) => {
 });
 
 //functions
+function syncCalendar() {
+	exec("vdirsyncer sync", (err, stdout, stderr) => {
+		if (err) {
+			console.error(err);
+			throw err;
+		}
+	});
+}

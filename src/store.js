@@ -2,7 +2,9 @@ import Vue from "vue";
 import Vuex from "vuex";
 var fs = require("fs");
 
-import { ipcRenderer } from "electron";
+import {
+	ipcRenderer
+} from "electron";
 
 Vue.use(Vuex);
 
@@ -12,10 +14,7 @@ export default new Vuex.Store({
 		today: new Date(),
 		currentMonth: undefined,
 		currentYear: undefined,
-		dayView: false,
 		clickedDate: undefined,
-		clickedMonth: undefined,
-		clickedYear: undefined,
 		months: [
 			"January",
 			"February",
@@ -30,8 +29,10 @@ export default new Vuex.Store({
 			"November",
 			"December",
 		],
-		addEventModal: false,
 		events: [],
+		modals: {
+			addEventModal: false,
+		}
 	},
 	mutations: {
 		incrementMonth(state) {
@@ -102,17 +103,18 @@ export default new Vuex.Store({
 						state.currentMonth,
 						32
 					).getDate();
-				state.clickedMonth != undefined
-					? state.clickedMonth--
-					: (state.clickedMonth = state.currentMonth);
+				state.clickedMonth != undefined ?
+					state.clickedMonth--
+					:
+					(state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
 		},
 		openAddEventView(state) {
-			state.addEventModal = true;
+			state.modals.addEventModal = true;
 		},
 		closeAddEventView(state) {
-			state.addEventModal = false;
+			state.modals.addEventModal = false;
 		},
 	},
 	actions: {},
