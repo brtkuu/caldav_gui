@@ -1,15 +1,13 @@
 <template>
   <div id="app">
     <header>
-      <router-link to="/" exact>Home</router-link>
-      <span>&nbsp;|&nbsp;</span>
-      <router-link to="/month" exact>Months</router-link>
+      <router-link to="/month" exact>Month</router-link>
       <span>&nbsp;|&nbsp;</span>
       <router-link to="/day" exact>Day</router-link>
       <button class="syncButton" @click="syncCalendar">Sync</button>
-	  <button class="todayButton" @click="today">Today</button>
+      <button class="todayButton" @click="today">Today</button>
     </header>
-    <router-view/>
+    <router-view />
   </div>
 </template>
 <script>
@@ -17,9 +15,12 @@ import { ipcRenderer } from "electron";
 
 export default {
 	name: "App",
+
 	methods: {
 		syncCalendar() {
 			ipcRenderer.send("syncCalendar");
+			this.$store.commit("updateEvents");
+			this.$router.replace("/month");
 		},
 		today() {
 			this.$store.state.currentMonth = new Date().getMonth();
@@ -37,10 +38,12 @@ export default {
 		ipcRenderer.send("calendarStarted");
 		ipcRenderer.on("got-data", (event, data) => {
 			this.$store.state.events.push(data);
-			console.log(data.summary);
 		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
+		setTimeout(() => {
+			this.$router.push({ name: "monthview" });
+		}, 300);
 	},
 };
 </script>

@@ -19,6 +19,8 @@ const util = require("util");
 
 const readdir = util.promisify(fs.readdir);
 
+syncCalendar();
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 if (isDevelopment) {
 	// Don't load any native (external) modules until the following line is run:
@@ -93,34 +95,30 @@ app.on("ready", async () => {
 		await installVueDevtools();
 	}
 	mainWindow = createMainWindow();
-	syncCalendar();
 });
 //Response on ipcRenderer.send
 ipcMain.on("syncCalendar", (event, data) => {
 	syncCalendar();
 });
-
+//Render process communication with main process
 ipcMain.on("createEvent", (event, data) => {
 	const ID = uid(16).toUpperCase();
+	const startDate = createEventDate(data.start, data.allDay);
+
+	const endDate = createEventDate(data.end, data.allDay);
+
 	const newEvent = `BEGIN:VCALENDAR\nPRODID:-//Nextcloud calendar v1.6.5\nVERSION:2.0\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nUID:${ID}\nSUMMARY:${
 		data.title
 	}\nDESCRIPTION:${data.description}\nLOCATION:${
 		data.location
-	}\nCLASS:PUBLIC\nDTSTART;VALUE=DATE:${data.start[0]}${
-		data.start[1] >= 10 ? data.start[1] : "0" + data.start[1]
-	}${
-		data.start[2] >= 10 ? data.start[2] : "0" + data.start[2]
-	}\nDTEND;VALUE=DATE:${data.start[0]}${
-		data.end[1] >= 10 ? data.end[1] : "0" + data.end[1]
-	}${
-		data.end[2] >= 10 ? data.end[2] : "0" + data.end[2]
-	}\nEND:VEVENT\nEND:VCALENDAR`;
+	}\nCLASS:PUBLIC\nDTSTART;${startDate}\nDTEND;${endDate}\nEND:VEVENT\nEND:VCALENDAR`;
 
 	fs.writeFile(`/usr/local/Cellar/calendar/bartek/${ID}.ics`, newEvent);
 });
 
 ipcMain.on("calendarStarted", (event, data) => {
 	async function myF() {
+		console.log("calStart");
 		let names;
 		try {
 			names = await readdir("/usr/local/Cellar/calendar/bartek/");
@@ -142,6 +140,17 @@ ipcMain.on("calendarStarted", (event, data) => {
 	myF();
 });
 
+ipcMain.on("deleteEvent", (event, data) => {
+	syncCalendar();
+	fs.unlink(`/usr/local/Cellar/calendar/bartek/${data}.ics`, (err) => {
+		if (err) {
+			throw err;
+		} else {
+			console.log(`File ${data}.ics deleted!`);
+		}
+	});
+});
+
 //functions
 function syncCalendar() {
 	exec("vdirsyncer sync", (err, stdout, stderr) => {
@@ -150,4 +159,18 @@ function syncCalendar() {
 			throw err;
 		}
 	});
+}
+
+function createEventDate(date, allDay) {
+	return `${
+		allDay
+			? `VALUE=DATE:${date[0]}${
+					`${date[1]}`.length == 2 ? date[1] : "0" + date[1]
+			  }${`${date[2]}`.length == 2 ? date[2] : "0" + date[2]}`
+			: `TZID=Europe/Warsaw:${date[0]}${
+					`${date[1]}`.length == 2 ? date[1] : "0" + date[1]
+			  }${`${date[2]}`.length == 2 ? date[2] : "0" + date[2]}T${
+					`${date[3]}`.length == 2 ? date[3] : "0" + date[3]
+			  }${`${date[4]}`.length == 2 ? date[4] : "0" + date[4]}00`
+	}`;
 }

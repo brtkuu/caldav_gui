@@ -11,20 +11,28 @@
       {{ this.$store.state.months[this.$store.state.currentMonth] }} {{ this.$store.state.currentYear }}
     </p>
 	<div class="dayBody">
-		<ul class="eventsList"></ul>
+		<ul @click="clickEvent" class="eventsList"></ul>
 	</div>
     <button class="addEvent" @click="openAddView">Add Event</button>
     <add-event v-if="this.$store.state.modals.addEventModal" class="addEvent"></add-event>
+	<event-info class="eventInfo" v-if="this.$store.state.modals.eventInfoModal" v-bind:event='clickedEvent'></event-info>
 
   </div>
 </template>
 <script>
 import AddEvent from "../components/addEvent";
+import EventModal from "../components/eventModal";
 
 export default {
 	name: "DayView",
 	components: {
 		"add-event": AddEvent,
+		"event-info": EventModal,
+	},
+	data() {
+		return {
+			clickedEvent: undefined,
+		};
 	},
 	methods: {
 		displayEvents() {
@@ -32,10 +40,8 @@ export default {
 				`${this.$store.state.currentYear} ${this.$store.state
 					.currentMonth + 1}, ${this.$store.state.clickedDate}`
 			);
-			console.log(d);
 			this.$store.state.events.forEach((ele, index) => {
 				const event = this.createEvent(ele, d);
-				console.log(event);
 				if (event) {
 					event.id = index;
 					document.querySelector(".eventsList").appendChild(event);
@@ -70,13 +76,13 @@ export default {
 				eventDateStart.getMonth() == d.getMonth() &&
 				eventDateStart.getFullYear() == d.getFullYear()
 			) {
-				const eventLabel = document.createElement("p");
+				const eventLabel = document.createElement("li");
 				const endHour =
 					eventDateEnd.getHours() != 0
 						? eventDateEnd.getHours()
 						: "0" + eventDateEnd.getHours();
 				const endMinutes =
-					eventDateEnd.getMinutes() == 2
+					`${eventDateEnd.getMinutes()}`.length == 2
 						? eventDateEnd.getMinutes()
 						: "0" + eventDateEnd.getMinutes();
 
@@ -85,7 +91,7 @@ export default {
 						? eventDateStart.getHours()
 						: "0" + eventDateStart.getHours();
 				const startMinutes =
-					eventDateStart.getMinutes() == 2
+					`${eventDateStart.getMinutes()}`.length == 2
 						? eventDateStart.getMinutes()
 						: "0" + eventDateStart.getMinutes();
 
@@ -101,9 +107,12 @@ export default {
 			}
 			return null;
 		},
+		clickEvent() {
+			this.clickedEvent = this.$store.state.events[event.target.id];
+			this.$store.commit("openInfoEventView");
+		},
 	},
 	mounted() {
-		console.log(this.$store.state.currentYear);
 		if (this.$store.state.clickedDate == undefined) {
 			this.$store.state.clickedDate = new Date().getDate();
 		}
@@ -114,7 +123,7 @@ export default {
 <style>
 .dayHeader {
 	text-align: center;
-	font-size: 40px;
+	font-size: 50px;
 }
 .dayNav {
 	display: flex;
@@ -131,9 +140,30 @@ export default {
 	transform: translate(-50%, -50%);
 	z-index: 1;
 }
+.eventsList {
+	list-style: none;
+	align-items: center;
+}
 .eventListLabel {
-	margin: 10px;
+	height: 40px;
+	margin: 20px auto 10px auto;
 	text-align: center;
 	font-size: 30px;
+	width: 400px;
+	border-bottom: 3px solid;
+	transition: font-size 0.2s ease-in-out, box-shadow 0.1s ease-in-out;
+	overflow: hidden;
+}
+.eventListLabel:hover {
+	font-size: 35px;
+	cursor: pointer;
+	box-shadow: -1px 12px 8px -5px rgba(179, 179, 179, 1);
+}
+.eventInfo {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
 }
 </style>

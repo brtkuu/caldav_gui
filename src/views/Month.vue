@@ -63,7 +63,7 @@ export default {
 				this.$store.state.events.forEach((ele, index) => {
 					const event = this.dispEvent(ele, d);
 					if (event) {
-						event.id = index;
+						event.id = i;
 						calendarElement.appendChild(event);
 					}
 				});
@@ -132,7 +132,7 @@ export default {
 						? eventDateEnd.getHours()
 						: "0" + eventDateEnd.getHours();
 				const endMinutes =
-					eventDateEnd.getMinutes() == 2
+					`${eventDateEnd.getMinutes()}`.length == 2
 						? eventDateEnd.getMinutes()
 						: "0" + eventDateEnd.getMinutes();
 
@@ -141,7 +141,7 @@ export default {
 						? eventDateStart.getHours()
 						: "0" + eventDateStart.getHours();
 				const startMinutes =
-					eventDateStart.getMinutes() == 2
+					`${eventDateStart.getMinutes()}`.length == 2
 						? eventDateStart.getMinutes()
 						: "0" + eventDateStart.getMinutes();
 
@@ -160,6 +160,7 @@ export default {
 	},
 	mounted() {
 		console.log("mounted");
+		document.querySelector(".dayOfMonth").innerHTML = "";
 		(this.months = [
 			"January",
 			"February",
@@ -177,6 +178,7 @@ export default {
 			this.setLabel();
 		this.createTable();
 		this.$store.commit("closeAddEventView");
+		console.log(this.$store.state.events);
 	},
 };
 </script>

@@ -2,9 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 var fs = require("fs");
 
-import {
-	ipcRenderer
-} from "electron";
+import { ipcRenderer } from "electron";
 
 Vue.use(Vuex);
 
@@ -32,7 +30,8 @@ export default new Vuex.Store({
 		events: [],
 		modals: {
 			addEventModal: false,
-		}
+			eventInfoModal: false,
+		},
 	},
 	mutations: {
 		incrementMonth(state) {
@@ -103,10 +102,9 @@ export default new Vuex.Store({
 						state.currentMonth,
 						32
 					).getDate();
-				state.clickedMonth != undefined ?
-					state.clickedMonth--
-					:
-					(state.clickedMonth = state.currentMonth);
+				state.clickedMonth != undefined
+					? state.clickedMonth--
+					: (state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
 		},
@@ -115,6 +113,16 @@ export default new Vuex.Store({
 		},
 		closeAddEventView(state) {
 			state.modals.addEventModal = false;
+		},
+		openInfoEventView(state) {
+			state.modals.eventInfoModal = true;
+		},
+		closeInfoEventView(state) {
+			state.modals.eventInfoModal = false;
+		},
+		updateEvents(state) {
+			ipcRenderer.send("calendarStarted");
+			state.events = [];
 		},
 	},
 	actions: {},

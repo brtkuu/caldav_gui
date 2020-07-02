@@ -4,9 +4,8 @@
       <label for="title">Title:</label>
       <input type="text" name="title" id="title" />
       <br />
-      <label for="allday">All day event:</label> Yes
-      <input type="checkbox" name="allday" id="alldayyes" /> No
-      <input type="checkbox" name="allday" id="alldayno" />
+      <label for="allday">All day event:</label>
+      <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent"/>
       <br />
       <label for="start">Start hour:</label>
       <input type="time" name="start" id="start" />
@@ -32,9 +31,11 @@ export default {
 	methods: {
 		addEvent() {
 			const inputs = document.querySelectorAll("input");
-			const startHour = inputs[3].value.split(":");
-			const endHour = inputs[4].value.split(":");
+			console.log(inputs);
+			const startHour = inputs[2].value.split(":");
+			const endHour = inputs[3].value.split(":");
 			const event = {
+				allDay: inputs[1].checked,
 				start: [
 					this.$store.state.currentYear,
 					this.$store.state.currentMonth + 1,
@@ -51,13 +52,26 @@ export default {
 				],
 				title: inputs[0].value,
 				description: document.querySelector("textarea").value,
-				location: inputs[5].value,
+				location: inputs[4].value,
 			};
 			ipcRenderer.send("createEvent", event);
+			this.$store.commit("updateEvents");
 			this.$store.commit("closeAddEventView");
+			ipcRenderer.send("syncCalendar");
+			setTimeout(() => {
+				this.$router.push({ name: "monthview" });
+			}, 200);
 		},
 		closeAddView() {
 			this.$store.commit("closeAddEventView");
+		},
+		allDayEvent() {
+			document.querySelector("#start").disabled = !document.querySelector(
+				"#start"
+			).disabled;
+			document.querySelector("#end").disabled = !document.querySelector(
+				"#end"
+			).disabled;
 		},
 	},
 };
