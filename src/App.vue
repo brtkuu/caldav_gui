@@ -53,12 +53,13 @@ export default {
 }
 header {
 	font-size: 30px;
-	background-color: rgb(189, 189, 189);
+	background-color: rgb(137, 83, 173);
 	text-align: center;
+	color: white;
 }
 header a {
 	text-decoration: none;
-	color: black;
+	color: white;
 }
 .router-link-active {
 	font-weight: 900;
@@ -71,6 +72,7 @@ header a {
 	background-color: transparent;
 	border: none;
 	cursor: pointer;
+	color: white;
 }
 .todayButton {
 	position: absolute;
@@ -80,5 +82,6 @@ header a {
 	cursor: pointer;
 	left: 0%;
 	transform: translateX(5%);
+	color: white;
 }
 </style>

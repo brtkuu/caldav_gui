@@ -11,12 +11,14 @@
       {{ this.$store.state.months[this.$store.state.currentMonth] }} {{ this.$store.state.currentYear }}
     </p>
 	<div class="dayBody">
-		<ul @click="clickEvent" class="eventsList"></ul>
+		<ul @click="clickEvent" class="eventsList">
+		</ul>
 	</div>
-    <button class="addEvent" @click="openAddView">Add Event</button>
-    <add-event v-if="this.$store.state.modals.addEventModal" class="addEvent"></add-event>
+    <button class="addEventBtn" @click="openAddView">Add Event</button>
+	<transition name="fade" mode="out-in" :duration="350">
+	<add-event v-if="this.$store.state.modals.addEventModal" class="addEvent"></add-event>
 	<event-info class="eventInfo" v-if="this.$store.state.modals.eventInfoModal" v-bind:event='clickedEvent'></event-info>
-
+	</transition>
   </div>
 </template>
 <script>
@@ -135,10 +137,18 @@ export default {
 }
 .addEvent {
 	position: absolute;
-	left: 50%;
 	top: 50%;
+	left: 50%;
 	transform: translate(-50%, -50%);
 	z-index: 1;
+	font-size: 25px;
+}
+.addEventBtn {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1;
+	font-size: 25px;
 }
 .eventsList {
 	list-style: none;
@@ -148,16 +158,16 @@ export default {
 	height: 40px;
 	margin: 20px auto 10px auto;
 	text-align: center;
-	font-size: 30px;
+	font-size: 20px;
 	width: 400px;
-	border-bottom: 3px solid;
-	transition: font-size 0.2s ease-in-out, box-shadow 0.1s ease-in-out;
+	transition: font-size 0.2s ease-in-out;
 	overflow: hidden;
+	background-color: rgb(216, 216, 216);
+	line-height: 40px;
 }
 .eventListLabel:hover {
 	font-size: 35px;
 	cursor: pointer;
-	box-shadow: -1px 12px 8px -5px rgba(179, 179, 179, 1);
 }
 .eventInfo {
 	position: absolute;
@@ -165,5 +175,12 @@ export default {
 	top: 50%;
 	transform: translate(-50%, -50%);
 	z-index: 1;
+}
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+	opacity: 0;
 }
 </style>

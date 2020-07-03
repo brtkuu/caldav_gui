@@ -204,8 +204,8 @@ export default {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  border-top: 1px solid black;
-  border-left: 1px solid black;
+  border-top: 1px solid white;
+  border-left: 1px solid white;
 }
 
 .month {
@@ -217,19 +217,20 @@ export default {
   display: grid;
   height: 30px;
   grid-template-columns: repeat(7, 1fr);
-  background-color: rgb(202, 202, 202);
   grid-gap: 5px;
   line-height: 30px;
   text-align: center;
+  background-color: rgb(137, 83, 173);
+  color: rgb(219, 219, 219);
 }
 
 .day {
   cursor: pointer;
-  border-bottom: 1px solid black;
-  border-right: 1px solid black;
+  border-bottom: 1px solid rgb(197, 197, 197);
+  border-right: 1px solid rgb(197, 197, 197);
   height: 150px;
   padding: 3px;
-  background-color: rgb(190, 190, 190);
+  background-color: rgb(172, 130, 206);
 }
 
 .dayLabel {
@@ -238,14 +239,14 @@ export default {
   width: 25px;
   line-height: 25px;
   text-align: center;
-  border: 2px solid rgb(0, 0, 0);
-  border-radius: 20px;
   opacity: 0.5;
+  color: rgb(247, 247, 247);
 }
 
 .day:hover .dayLabel {
-  background-color: rgb(155, 155, 155);
+  background-color: rgb(212, 212, 212);
   opacity: 1;
+  color: black;
 }
 .currentDate {
   color: white;
@@ -278,7 +279,10 @@ export default {
   width: 490px;
   line-height: 50px;
 }
-.eventLabel{
-	font-size: 15px;
+.eventLabel {
+  margin-top: 6px;
+  font-size: 15px;
+  color: rgb(240, 240, 240);
+  overflow: hidden;
 }
 </style>
