@@ -27,11 +27,15 @@ export default {
 	},
 	methods: {
 		writeHours() {
-			for (let i = 0; i < 24; i++) {
+			for (let i = -1; i < 25; i++) {
 				const hourLabelFull = document.createElement("p");
 				const hoursTable = document.querySelector(".hoursTable");
 				hourLabelFull.classList.add("hourLabel");
-				hourLabelFull.innerHTML = `${i}:00`;
+				if (i == -1) {
+					hourLabelFull.innerHTML = `All Day`;
+				} else {
+					hourLabelFull.innerHTML = `${i}:00`;
+				}
 				hourLabelFull.style.gridColumn = "1/2";
 				hoursTable.appendChild(hourLabelFull);
 			}
@@ -56,21 +60,25 @@ export default {
 					const topOffset = hours * 80 + minutes * 1.34;
 					const duration =
 						durationHours * 80 + durationMinutes * 1.34;
-					event.style.top = `${topOffset}px`;
+					event.style.top = `${topOffset + (duration ? 80 : 0)}px`;
 					const offSetsArr = document.querySelectorAll(
 						".eventDayLabel"
 					);
 					offSetsArr.forEach((ele) => {
 						if (
-							topOffset > ele.offsetTop &&
-							topOffset < ele.offsetTop + ele.clientHeight
+							topOffset >= ele.offsetTop &&
+							topOffset <= ele.offsetTop + ele.clientHeight
 						) {
-							event.style.left = "315px";
+							event.style.left = duration ? "315px" : "0";
 						}
 					});
-					event.style.height = `${duration}px`;
-					event.style.lineHeight = `${durationHours * 80 +
-						durationMinutes * 1.34}px`;
+					if (duration) {
+						event.style.height = `${duration}px`;
+						event.style.lineHeight = `${durationHours * 80 +
+							durationMinutes * 1.34}px`;
+					} else {
+						event.classList.add("allDayEvent");
+					}
 					document.querySelector(".hourDiv").appendChild(event);
 				}
 			});
@@ -122,6 +130,7 @@ export default {
 		},
 		clickEvent() {
 			if (event.target.id) {
+				console.log("click");
 				this.clickedEvent = this.$store.state.events[event.target.id];
 				this.$store.commit("openInfoEventView");
 			}
@@ -179,5 +188,13 @@ export default {
 }
 .addEvent {
 	position: fixed;
+}
+.allDayEvent {
+	position: relative;
+	display: inline-block;
+	line-height: 50px;
+	height: 50px;
+	width: 200px;
+	margin: 10px 10px 0 10px;
 }
 </style>
