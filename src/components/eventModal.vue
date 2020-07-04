@@ -61,8 +61,10 @@ export default {
 			this.$store.commit("closeInfoEventView");
 			this.$store.commit("updateEvents");
 			setTimeout(() => {
-				this.$router.push({ name: "monthview" });
-			}, 200);
+				const location = this.$route.fullPath;
+				this.$router.replace("/");
+				this.$nextTick(() => this.$router.replace(location));
+			}, 100);
 		},
 	},
 	mounted() {

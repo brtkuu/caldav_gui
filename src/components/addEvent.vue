@@ -31,7 +31,6 @@ export default {
 	methods: {
 		addEvent() {
 			const inputs = document.querySelectorAll("input");
-			console.log(inputs);
 			const startHour = inputs[2].value.split(":");
 			const endHour = inputs[3].value.split(":");
 			const event = {
@@ -59,8 +58,10 @@ export default {
 			this.$store.commit("closeAddEventView");
 			ipcRenderer.send("syncCalendar");
 			setTimeout(() => {
-				this.$router.push({ name: "monthview" });
-			}, 200);
+				const location = this.$route.fullPath;
+				this.$router.replace("/");
+				this.$nextTick(() => this.$router.replace(location));
+			}, 100);
 		},
 		closeAddView() {
 			this.$store.commit("closeAddEventView");

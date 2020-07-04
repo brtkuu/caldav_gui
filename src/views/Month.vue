@@ -57,7 +57,11 @@ export default {
 						calendarElement.style.gridColumn = d.getDay();
 					}
 				}
-
+				if (this.checkToday(d)) {
+					calendarElementLabel.style.color = "red";
+					calendarElementLabel.style.fontSize = "23px";
+					calendarElementLabel.style.textDecoration = "underline";
+				}
 				calendarElementLabel.innerHTML = i;
 				calendarElement.appendChild(calendarElementLabel);
 				this.$store.state.events.forEach((ele, index) => {
@@ -116,7 +120,7 @@ export default {
 			);
 			this.$store.state.clickedDate = event.target.id;
 			this.$store.state.currentYear = monthArr[1] * 1;
-			this.$router.push({ name: "dayview" });
+			this.$router.push({ name: "agendaview" });
 		},
 		dispEvent(ele, d) {
 			const eventDateStart = new Date(ele.start);
@@ -157,9 +161,19 @@ export default {
 			}
 			return null;
 		},
+		checkToday(d) {
+			const today = new Date();
+			if (
+				d.getDate() == today.getDate() &&
+				d.getMonth() == today.getMonth() &&
+				d.getFullYear() == today.getFullYear()
+			) {
+				return true;
+			}
+			return false;
+		},
 	},
 	mounted() {
-		console.log("mounted");
 		document.querySelector(".dayOfMonth").innerHTML = "";
 		(this.months = [
 			"January",
@@ -178,7 +192,6 @@ export default {
 			this.setLabel();
 		this.createTable();
 		this.$store.commit("closeAddEventView");
-		console.log(this.$store.state.events);
 	},
 };
 </script>
@@ -220,7 +233,7 @@ export default {
   grid-gap: 5px;
   line-height: 30px;
   text-align: center;
-  background-color: rgb(137, 83, 173);
+  background-color: RGB(139, 186, 196);
   color: rgb(219, 219, 219);
 }
 
@@ -230,7 +243,7 @@ export default {
   border-right: 1px solid rgb(197, 197, 197);
   height: 150px;
   padding: 3px;
-  background-color: rgb(172, 130, 206);
+  background-color: RGB(101, 57, 124);
 }
 
 .dayLabel {

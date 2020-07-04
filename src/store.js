@@ -2,14 +2,15 @@ import Vue from "vue";
 import Vuex from "vuex";
 var fs = require("fs");
 
-import { ipcRenderer } from "electron";
+import {
+	ipcRenderer
+} from "electron";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
 	state: {
 		currentDate: new Date(),
-		today: new Date(),
 		currentMonth: undefined,
 		currentYear: undefined,
 		clickedDate: undefined,
@@ -67,8 +68,6 @@ export default new Vuex.Store({
 					state.currentMonth++;
 				}
 				state.clickedMonth = state.currentMonth;
-				console.log(state.clickedMonth);
-				console.log(state.currentMonth);
 				state.currentDate++;
 			}
 		},
@@ -85,9 +84,7 @@ export default new Vuex.Store({
 				}`
 			);
 			if (a.getMonth() != d.getMonth()) {
-				console.log(state.currentMonth);
 				if (state.currentMonth == 0) {
-					console.log("zero");
 					state.currentMonth = 11;
 					state.clickedMonth = 11;
 					state.currentYear--;
@@ -102,9 +99,10 @@ export default new Vuex.Store({
 						state.currentMonth,
 						32
 					).getDate();
-				state.clickedMonth != undefined
-					? state.clickedMonth--
-					: (state.clickedMonth = state.currentMonth);
+				state.clickedMonth != undefined ?
+					state.clickedMonth--
+					:
+					(state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
 		},
@@ -121,8 +119,15 @@ export default new Vuex.Store({
 			state.modals.eventInfoModal = false;
 		},
 		updateEvents(state) {
-			ipcRenderer.send("calendarStarted");
 			state.events = [];
+			ipcRenderer.send("calendarStarted");
+			setTimeout(() => {
+				state.events.sort(function (a, b) {
+					a = new Date(a.start);
+					b = new Date(b.start);
+					return a.getTime() - b.getTime();
+				});
+			}, 100)
 		},
 	},
 	actions: {},

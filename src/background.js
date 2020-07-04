@@ -1,13 +1,22 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain } from "electron";
+import {
+	app,
+	protocol,
+	BrowserWindow,
+	ipcMain
+} from "electron";
 import * as path from "path";
-import { format as formatUrl } from "url";
+import {
+	format as formatUrl
+} from "url";
 import {
 	createProtocol,
 	installVueDevtools,
 } from "vue-cli-plugin-electron-builder/lib";
-import { exec } from "child_process";
+import {
+	exec
+} from "child_process";
 
 import uid from "uid";
 
@@ -38,8 +47,10 @@ protocol.registerStandardSchemes(["app"], {
 
 function createMainWindow() {
 	const window = new BrowserWindow({
-		minWidth: 900,
-		minHeight: 700,
+		width: 1000,
+		height: 700,
+		minWidth: 800,
+		minHeight: 600,
 	});
 
 	if (isDevelopment) {

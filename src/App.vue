@@ -3,7 +3,9 @@
     <header>
       <router-link to="/month" exact>Month</router-link>
       <span>&nbsp;|&nbsp;</span>
-      <router-link to="/day" exact>Day</router-link>
+      <router-link to="/agenda" exact>Agenda</router-link>
+	  <span>&nbsp;|&nbsp;</span>
+	  <router-link to="/day" exact>Day</router-link>
       <button class="syncButton" @click="syncCalendar">Sync</button>
       <button class="todayButton" @click="today">Today</button>
     </header>
@@ -26,8 +28,6 @@ export default {
 			this.$store.state.currentMonth = new Date().getMonth();
 			this.$store.state.currentYear = new Date().getFullYear();
 			this.$store.state.clickedDate = new Date().getDate();
-			this.$store.state.clickedMonth = new Date().getMonth();
-			this.$store.state.clickedYear = new Date().getFullYear();
 			const location = this.$route.fullPath;
 			this.$router.replace("/");
 			this.$nextTick(() => this.$router.replace(location));
@@ -43,7 +43,12 @@ export default {
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
 		setTimeout(() => {
 			this.$router.push({ name: "monthview" });
-		}, 300);
+			this.$store.state.events.sort(function(a, b) {
+				a = new Date(a.start);
+				b = new Date(b.start);
+				return a.getTime() - b.getTime();
+			});
+		}, 100);
 	},
 };
 </script>
@@ -53,7 +58,7 @@ export default {
 }
 header {
 	font-size: 30px;
-	background-color: rgb(137, 83, 173);
+	background-color: RGB(82, 148, 161);
 	text-align: center;
 	color: white;
 }
