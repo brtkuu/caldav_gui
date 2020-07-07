@@ -2,9 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 var fs = require("fs");
 
-import {
-	ipcRenderer
-} from "electron";
+import { ipcRenderer } from "electron";
 
 Vue.use(Vuex);
 
@@ -99,10 +97,9 @@ export default new Vuex.Store({
 						state.currentMonth,
 						32
 					).getDate();
-				state.clickedMonth != undefined ?
-					state.clickedMonth--
-					:
-					(state.clickedMonth = state.currentMonth);
+				state.clickedMonth != undefined
+					? state.clickedMonth--
+					: (state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
 		},
@@ -120,14 +117,16 @@ export default new Vuex.Store({
 		},
 		updateEvents(state) {
 			state.events = [];
-			ipcRenderer.send("calendarStarted");
+			ipcRenderer.send("get-data");
+
 			setTimeout(() => {
-				state.events.sort(function (a, b) {
+				state.events.sort(function(a, b) {
 					a = new Date(a.start);
 					b = new Date(b.start);
 					return a.getTime() - b.getTime();
 				});
-			}, 100)
+				console.log(state.events);
+			}, 100);
 		},
 	},
 	actions: {},

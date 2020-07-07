@@ -1,34 +1,26 @@
 "use strict";
 
-import {
-	app,
-	protocol,
-	BrowserWindow,
-	ipcMain
-} from "electron";
+import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
-import {
-	format as formatUrl
-} from "url";
+import { format as formatUrl } from "url";
 import {
 	createProtocol,
 	installVueDevtools,
 } from "vue-cli-plugin-electron-builder/lib";
-import {
-	exec
-} from "child_process";
+import { exec } from "child_process";
 
 import uid from "uid";
-
-const fromEntries = require("object.fromentries");
 
 const ical = require("ical");
 const fs = require("fs");
 const util = require("util");
+const os = require("os");
 
 const readdir = util.promisify(fs.readdir);
 
-syncCalendar();
+let confPath = "";
+
+checkConfig();
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 if (isDevelopment) {
@@ -38,7 +30,6 @@ if (isDevelopment) {
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow;
-let taskWindow;
 
 // Standard scheme must be registered before the app is ready
 protocol.registerStandardSchemes(["app"], {
@@ -112,6 +103,26 @@ ipcMain.on("syncCalendar", (event, data) => {
 	syncCalendar();
 });
 //Render process communication with main process
+
+ipcMain.on("calendar-start", (event, data) => {
+	fs.readFile(
+		`${os.homedir()}/.config/sealcal/config.txt`,
+		{
+			encoding: "utf-8",
+		},
+		(err, data) => {
+			if (err) {
+				event.sender.send("config-error", "No config file");
+				console.error(err);
+				return;
+			}
+			confPath = data;
+			event.sender.send("config-correct", "Config correct");
+			syncCalendar();
+		}
+	);
+});
+
 ipcMain.on("createEvent", (event, data) => {
 	const ID = uid(16).toUpperCase();
 	const startDate = createEventDate(data.start, data.allDay);
@@ -127,24 +138,28 @@ ipcMain.on("createEvent", (event, data) => {
 	fs.writeFile(`/usr/local/Cellar/calendar/bartek/${ID}.ics`, newEvent);
 });
 
-ipcMain.on("calendarStarted", (event, data) => {
+ipcMain.on("get-data", (event, data) => {
 	async function myF() {
-		console.log("calStart");
-		let names;
 		try {
-			names = await readdir("/usr/local/Cellar/calendar/bartek/");
+			await readdir("/usr/local/Cellar/calendar/bartek/").then(
+				(names) => {
+					if (names === undefined) {
+						console.log("undefined");
+					} else {
+						names.forEach((file) => {
+							const data = ical.parseFile(
+								`/usr/local/Cellar/calendar/bartek/${file}`
+							);
+							event.sender.send(
+								"got-data",
+								data[Object.keys(data)[0]]
+							);
+						});
+					}
+				}
+			);
 		} catch (err) {
-			console.log(err);
-		}
-		if (names === undefined) {
-			console.log("undefined");
-		} else {
-			names.forEach((file) => {
-				const data = ical.parseFile(
-					`/usr/local/Cellar/calendar/bartek/${file}`
-				);
-				event.sender.send("got-data", data[Object.keys(data)[0]]);
-			});
+			throw err;
 		}
 	}
 
@@ -161,14 +176,64 @@ ipcMain.on("deleteEvent", (event, data) => {
 		}
 	});
 });
+ipcMain.on("set-config", (event, data) => {
+	saveConfigFile(data);
+	event.sender.send("config-correct", "config set-correct");
+});
+
+ipcMain.on("create-config", (event, data) => {
+	fs.exists(`${os.homedir()}/sealcalendar`, (exists) => {
+		if (!exists) {
+			fs.mkdir(`${os.homedir()}/sealcalendar`, (err) => {
+				fs.mkdir(`${os.homedir()}/sealcalendar/status`);
+				fs.mkdir(
+					`${os.homedir()}/sealcalendar/calendar_files`,
+					(err) => {
+						fs.mkdir(
+							`${os.homedir()}/sealcalendar/calendar_files/bartek`
+						);
+					}
+				);
+			});
+		}
+	});
+	const config = `[general]
+status_path = "${os.homedir()}/sealcalendar/status"
+
+[pair calendar]
+a = "seal_calendar"
+b = "local_calendar"
+collections = ["bartek"]
+conflict_resolution = "a wins"
+metadata = ["displayname"]
+
+[storage local_calendar]
+type = "filesystem"
+path = "${os.homedir()}/sealcalendar/calendar_files"
+fileext = ".ics"
+
+[storage seal_calendar]
+type = "caldav"
+url = "${data.url}"
+username = "${data.login}"
+password = "${data.password}"
+	`;
+	fs.writeFile(`${os.homedir()}/sealcalendar/config`, config, (err) => {
+		if (err) {
+			throw err;
+		}
+		saveConfigFile(`${os.homedir()}/sealcalendar/config`);
+	});
+});
 
 //functions
 function syncCalendar() {
-	exec("vdirsyncer sync", (err, stdout, stderr) => {
+	exec(`vdirsyncer -c ${confPath} sync`, (err, stdout, stderr) => {
 		if (err) {
-			console.error(err);
 			throw err;
 		}
+		console.log(stderr);
+		console.log(stdout);
 	});
 }
 
@@ -184,4 +249,27 @@ function createEventDate(date, allDay) {
 					`${date[3]}`.length == 2 ? date[3] : "0" + date[3]
 			  }${`${date[4]}`.length == 2 ? date[4] : "0" + date[4]}00`
 	}`;
+}
+
+function checkConfig() {
+	fs.exists(`${os.homedir()}/.config/sealcal`, (exists) => {
+		if (!exists) {
+			fs.mkdir(`${os.homedir()}/.config/sealcal`, (err) => {
+				if (err) {
+					throw err;
+				}
+			});
+		}
+	});
+}
+
+function saveConfigFile(data) {
+	fs.writeFile(`${os.homedir()}/.config/sealcal/config.txt`, data, (err) => {
+		if (err) {
+			throw err;
+		}
+		confPath = data;
+		console.log(data);
+		syncCalendar();
+	});
 }

@@ -170,7 +170,7 @@ export default {
 	/* width: 250px; */
 	background-color: rgba(103, 67, 112, 0.753);
 	margin-left: 30px;
-	font-size: 26px;
+	font-size: 24px;
 	overflow: hidden;
 	width: 320px;
 	text-align: center;
@@ -179,7 +179,7 @@ export default {
 }
 .eventDayLabel:hover {
 	cursor: pointer;
-	font-size: 28px;
+	font-size: 26px;
 	background-color: rgb(103, 67, 112);
 	z-index: 1;
 }
@@ -193,7 +193,7 @@ export default {
 	position: relative;
 	display: inline-block;
 	line-height: 50px;
-	height: 50px;
+	height: 6 0px;
 	width: 200px;
 	margin: 10px 10px 0 10px;
 }

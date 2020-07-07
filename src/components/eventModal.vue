@@ -59,6 +59,7 @@ export default {
 		deleteEvent() {
 			ipcRenderer.send("deleteEvent", event.target.id);
 			this.$store.commit("closeInfoEventView");
+			this.$store.state.events = [];
 			this.$store.commit("updateEvents");
 			setTimeout(() => {
 				const location = this.$route.fullPath;

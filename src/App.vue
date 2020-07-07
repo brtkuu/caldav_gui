@@ -4,8 +4,8 @@
       <router-link to="/month" exact>Month</router-link>
       <span>&nbsp;|&nbsp;</span>
       <router-link to="/agenda" exact>Agenda</router-link>
-	  <span>&nbsp;|&nbsp;</span>
-	  <router-link to="/day" exact>Day</router-link>
+      <span>&nbsp;|&nbsp;</span>
+      <router-link to="/day" exact>Day</router-link>
       <button class="syncButton" @click="syncCalendar">Sync</button>
       <button class="todayButton" @click="today">Today</button>
     </header>
@@ -22,7 +22,11 @@ export default {
 		syncCalendar() {
 			ipcRenderer.send("syncCalendar");
 			this.$store.commit("updateEvents");
-			this.$router.replace("/month");
+			setTimeout(() => {
+				const location = this.$route.fullPath;
+				this.$router.replace("/");
+				this.$nextTick(() => this.$router.replace(location));
+			}, 100);
 		},
 		today() {
 			this.$store.state.currentMonth = new Date().getMonth();
@@ -34,21 +38,23 @@ export default {
 		},
 	},
 	mounted() {
-		ipcRenderer.send("syncCalendar");
-		ipcRenderer.send("calendarStarted");
+		ipcRenderer.send("calendar-start");
 		ipcRenderer.on("got-data", (event, data) => {
 			this.$store.state.events.push(data);
 		});
+		ipcRenderer.on("config-error", (event, data) => {
+			console.log(data);
+			this.$router.push({ name: "loginview" });
+		});
+		ipcRenderer.on("config-correct", (event, data) => {
+			console.log(data);
+			this.$store.commit("updateEvents");
+			setTimeout(() => {
+				this.$router.push({ name: "monthview" });
+			}, 250);
+		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
-		setTimeout(() => {
-			this.$router.push({ name: "monthview" });
-			this.$store.state.events.sort(function(a, b) {
-				a = new Date(a.start);
-				b = new Date(b.start);
-				return a.getTime() - b.getTime();
-			});
-		}, 100);
 	},
 };
 </script>

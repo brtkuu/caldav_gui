@@ -54,6 +54,7 @@ export default {
 				location: inputs[4].value,
 			};
 			ipcRenderer.send("createEvent", event);
+			this.$store.state.events = [];
 			this.$store.commit("updateEvents");
 			this.$store.commit("closeAddEventView");
 			ipcRenderer.send("syncCalendar");
