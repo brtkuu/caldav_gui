@@ -199,8 +199,9 @@ ipcMain.on("deleteEvent", (event, data) => {
 	});
 });
 ipcMain.on("set-config", (event, data) => {
-	saveConfigFile(data);
-	event.sender.send("set-correct", "config set-correct");
+	saveConfigFile(data).then(() => {
+		event.sender.send("set-correct", "config set-correct");
+	});
 });
 
 ipcMain.on("create-config", (event, data) => {
