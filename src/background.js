@@ -1,6 +1,6 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain } from "electron";
+import { app, protocol, BrowserWindow, ipcMain, Menu } from "electron";
 import * as path from "path";
 import { format as formatUrl } from "url";
 import {
@@ -44,6 +44,8 @@ protocol.registerStandardSchemes(["app"], {
 	secure: true,
 });
 
+const isMac = process.platform === "darwin";
+
 function createMainWindow() {
 	const window = new BrowserWindow({
 		width: 1000,
@@ -51,6 +53,25 @@ function createMainWindow() {
 		minWidth: 800,
 		minHeight: 600,
 	});
+
+	const menu = Menu.buildFromTemplate([
+		{
+			label: "SealCal",
+			submenu: [
+				{
+					label: "Configuration",
+					click() {
+						window.webContents.send(
+							"config-error",
+							"change config"
+						);
+					},
+				},
+				{ role: "quit" },
+			],
+		},
+	]);
+	Menu.setApplicationMenu(menu);
 
 	if (isDevelopment) {
 		// Load the url of the dev server if in development mode
