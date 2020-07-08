@@ -42,16 +42,23 @@ export default {
 		ipcRenderer.on("got-data", (event, data) => {
 			this.$store.state.events.push(data);
 		});
+		ipcRenderer.on("config-created", (event, data) => {
+			ipcRenderer.send("calendar-start");
+		});
 		ipcRenderer.on("config-error", (event, data) => {
 			console.log(data);
 			this.$router.push({ name: "loginview" });
 		});
-		ipcRenderer.on("config-correct", (event, data) => {
-			console.log(data);
+		ipcRenderer.on("set-correct", (event, data) => {
+			ipcRenderer.send("calendar-start");
 			this.$store.commit("updateEvents");
+		});
+		ipcRenderer.on("config-correct", (event, data) => {
+			this.$store.commit("updateEvents");
+			console.log(data);
 			setTimeout(() => {
 				this.$router.push({ name: "monthview" });
-			}, 250);
+			}, 100);
 		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();

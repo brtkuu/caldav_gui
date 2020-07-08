@@ -10,11 +10,11 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "fromentries": "^1.2.0",
     "fs-promise": "^2.0.3",
     "ical": "^0.8.0",
     "ics": "^2.22.1",
     "node-sass": "^4.14.1",
-    "object.fromentries": "^2.0.2",
     "sass-loader": "^8.0.2",
     "uid": "^1.0.0",
     "vue": "^2.5.17",
