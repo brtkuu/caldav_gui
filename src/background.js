@@ -67,7 +67,69 @@ function createMainWindow() {
 						);
 					},
 				},
-				{ role: "quit" },
+				{
+					role: "quit",
+				},
+			],
+		},
+		{
+			label: "Edit",
+			submenu: [
+				{
+					role: "undo",
+				},
+				{
+					role: "redo",
+				},
+				{
+					type: "separator",
+				},
+				{
+					role: "cut",
+				},
+				{
+					role: "copy",
+				},
+				{
+					role: "paste",
+				},
+				...(isMac
+					? [
+							{
+								role: "pasteAndMatchStyle",
+							},
+							{
+								role: "delete",
+							},
+							{
+								role: "selectAll",
+							},
+							{
+								type: "separator",
+							},
+							{
+								label: "Speech",
+								submenu: [
+									{
+										role: "startspeaking",
+									},
+									{
+										role: "stopspeaking",
+									},
+								],
+							},
+					  ]
+					: [
+							{
+								role: "delete",
+							},
+							{
+								type: "separator",
+							},
+							{
+								role: "selectAll",
+							},
+					  ]),
 			],
 		},
 	]);
@@ -154,10 +216,15 @@ ipcMain.on("calendar-start", (event, data) => {
 			});
 
 			syncCalendar().then(() => {
-				calDirs.collections = calDirs.collections.split('"')[1];
+				const collec = calDirs.collections.split(/\["|\"]|"|,| /g);
+				calDirs.collections = [];
+				collec.forEach((ele) => {
+					if (ele) {
+						calDirs.collections.push(ele);
+					}
+				});
 				calDirs.path = calDirs.path.split('"')[1];
-				console.log(calDirs);
-				event.sender.send("config-correct", "Config correct");
+				event.sender.send("config-correct", calDirs.collections);
 			});
 		}
 	);
@@ -173,37 +240,65 @@ ipcMain.on("createEvent", (event, data) => {
 		data.title
 	}\nDESCRIPTION:${data.description}\nLOCATION:${
 		data.location
-	}\nCLASS:PUBLIC\nDTSTART;${startDate}\nDTEND;${endDate}\nEND:VEVENT\nEND:VCALENDAR`;
+	}\nCLASS:PUBLIC\nSTATUS:${
+		data.status
+	}\nDTSTART;${startDate}\nDTEND;${endDate}\nEND:VEVENT\nEND:VCALENDAR`;
 
-	fs.writeFile(`${calDirs.path}/${calDirs.collections}/${ID}.ics`, newEvent);
+	fs.writeFile(`${calDirs.path}/${data.collection}/${ID}.ics`, newEvent);
 });
 
 ipcMain.on("get-data", (event, data) => {
 	async function myF() {
 		syncCalendar();
-		try {
-			console.log(`${calDirs.path}${calDirs.collections}/`);
-			await readdir(`${calDirs.path}${calDirs.collections}/`).then(
-				(names) => {
+		await calDirs.collections.forEach(async (ele) => {
+			try {
+				await readdir(`${calDirs.path}/${ele}`).then((names) => {
 					console.log(names);
 					if (names === undefined) {
 						console.log("undefined");
 					} else {
 						names.forEach((file) => {
 							const data = ical.parseFile(
-								`${calDirs.path}/${calDirs.collections}/${file}`
+								`${calDirs.path}/${ele}/${file}`
 							);
-							event.sender.send(
-								"got-data",
-								data[Object.keys(data)[0]]
-							);
+							if (data[Object.keys(data)[0]].rrule) {
+								readfile(`${calDirs.path}/${ele}/${file}`, {
+									encoding: "utf-8",
+								})
+									.then((res) => {
+										res = res.slice(0, 400);
+										console.log(res);
+										const fileData = fromEntries(
+											res
+												.split("\n")
+												.map((line) => line.split(":"))
+										);
+										const frequency = fileData.RRULE.split(
+											"="
+										);
+										data[Object.keys(data)[0]].rrule =
+											frequency[1];
+										console.log(data[Object.keys(data)[0]]);
+									})
+									.then(() => {
+										event.sender.send(
+											"got-data",
+											data[Object.keys(data)[0]]
+										);
+									});
+							} else {
+								event.sender.send(
+									"got-data",
+									data[Object.keys(data)[0]]
+								);
+							}
 						});
 					}
-				}
-			);
-		} catch (err) {
-			throw err;
-		}
+				});
+			} catch (err) {
+				throw err;
+			}
+		});
 	}
 
 	myF();
@@ -211,12 +306,18 @@ ipcMain.on("get-data", (event, data) => {
 
 ipcMain.on("deleteEvent", (event, data) => {
 	syncCalendar();
-	fs.unlink(`${calDirs.path}/${calDirs.collections}/${data}.ics`, (err) => {
-		if (err) {
-			throw err;
-		} else {
-			console.log(`File ${data}.ics deleted!`);
-		}
+	calDirs.collections.forEach((ele) => {
+		pathExists(`${calDirs.path}/${ele}/${data}.ics`).then((exists) => {
+			if (exists) {
+				fs.unlink(`${calDirs.path}/${ele}/${data}.ics`, (err) => {
+					if (err) {
+						throw err;
+					} else {
+						console.log(`File ${data}.ics deleted!`);
+					}
+				});
+			}
+		});
 	});
 });
 ipcMain.on("set-config", (event, data) => {
@@ -234,22 +335,38 @@ ipcMain.on("create-config", (event, data) => {
 					fs.mkdir(
 						`${os.homedir()}/sealcalendar/calendar_files`,
 						(err) => {
-							fs.mkdir(
-								`${os.homedir()}/sealcalendar/calendar_files/bartek`
-							);
+							if (err) {
+								throw err;
+							}
+							data.collections.forEach((ele) => {
+								console.log(ele);
+								fs.mkdir(
+									`${os.homedir()}/sealcalendar/calendar_files/${ele}`
+								);
+							});
 						}
 					);
 				});
 			}
 		})
 		.then(() => {
+			let collections = "[";
+			data.collections.forEach((ele, index) => {
+				if (index != data.collections.length - 1) {
+					collections += `"${ele}",`;
+				} else {
+					collections += `"${ele}"`;
+				}
+			});
+			collections += "]";
+			console.log(collections);
 			const config = `[general]
 status_path = "${os.homedir()}/sealcalendar/status"
 
 [pair calendar]
 a = "seal_calendar"
 b = "local_calendar"
-collections = ["bartek"]
+collections = ${collections}
 conflict_resolution = "a wins"
 metadata = ["displayname"]
 
@@ -285,7 +402,8 @@ function syncCalendar() {
 	return new Promise((resolve, reject) => {
 		exec(`vdirsyncer -c ${confPath} sync`, (err, stdout, stderr) => {
 			if (err) {
-				throw err;
+				console.error(err);
+				return;
 			}
 			resolve(stdout);
 		});

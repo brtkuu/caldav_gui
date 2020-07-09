@@ -123,12 +123,26 @@ export default {
 			this.$router.push({ name: "agendaview" });
 		},
 		dispEvent(ele, d) {
+			console.log(ele.rrule);
 			const eventDateStart = new Date(ele.start);
 			const eventDateEnd = new Date(ele.end);
 			if (
-				eventDateStart.getDate() == d.getDate() &&
-				eventDateStart.getMonth() == d.getMonth() &&
-				eventDateStart.getFullYear() == d.getFullYear()
+				(eventDateStart.getDate() == d.getDate() &&
+					eventDateStart.getMonth() == d.getMonth() &&
+					eventDateStart.getFullYear() == d.getFullYear()) ||
+				(ele.rrule == "WEEKLY" &&
+					eventDateStart.getTime() < d.getTime() &&
+					d.getDay() == eventDateStart.getDay()) ||
+				(ele.rrule == "DAILY" &&
+					eventDateStart.getTime() < d.getTime()) ||
+				(ele.rrule == "MONTHLY" &&
+					eventDateStart.getTime() < d.getTime() &&
+					eventDateStart.getDate() == d.getDate()) ||
+				(ele.rrule == "YEARLY" &&
+					eventDateStart.getTime() < d.getTime() &&
+					eventDateStart.getFullYear() < d.getFullYear() &&
+					eventDateStart.getDate() == d.getDate() &&
+					eventDateStart.getMonth() == d.getMonth())
 			) {
 				const eventLabel = document.createElement("p");
 				const endHour =

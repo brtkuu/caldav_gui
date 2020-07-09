@@ -55,6 +55,8 @@ export default {
 		});
 		ipcRenderer.on("config-correct", (event, data) => {
 			this.$store.commit("updateEvents");
+			this.$store.state.collections = data;
+			console.log(this.$store.state.collections);
 			console.log(data);
 			setTimeout(() => {
 				this.$router.push({ name: "monthview" });
@@ -62,35 +64,6 @@ export default {
 		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
-		const { remote } = require("electron");
-		const { Menu, MenuItem } = remote;
-
-		const menu = new Menu();
-		menu.append(
-			new MenuItem({
-				label: "MenuItem1",
-				click() {
-					console.log("item 1 clicked");
-				},
-			})
-		);
-		menu.append(new MenuItem({ type: "separator" }));
-		menu.append(
-			new MenuItem({
-				label: "MenuItem2",
-				type: "checkbox",
-				checked: true,
-			})
-		);
-
-		window.addEventListener(
-			"contextmenu",
-			(e) => {
-				e.preventDefault();
-				menu.popup({ window: remote.getCurrentWindow() });
-			},
-			false
-		);
 	},
 };
 </script>

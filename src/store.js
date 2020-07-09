@@ -31,6 +31,7 @@ export default new Vuex.Store({
 			addEventModal: false,
 			eventInfoModal: false,
 		},
+		collections: undefined,
 	},
 	mutations: {
 		incrementMonth(state) {

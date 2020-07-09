@@ -4,6 +4,7 @@
         <label for="serverurl">Server URL: </label><input name="serverurl" /><br>
         <label for="login">Login: </label><input name="login" /><br>
         <label for="password">Password: </label><input name="password" type="password"/><br>
+		<label for="collection">Collection: </label><input name="collection" type="collection"/><br>
     </form>
     <button @click="createConfig">Create config</button>
 
@@ -25,6 +26,7 @@ export default {
 				url: inputs[0].value,
 				login: inputs[1].value,
 				password: inputs[2].value,
+				collections: inputs[3].value.split(","),
 			};
 			ipcRenderer.send("create-config", dataConf);
 		},
