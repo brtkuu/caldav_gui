@@ -21,6 +21,7 @@ export default {
 	name: "Login",
 	methods: {
 		createConfig() {
+			this.$router.push({ name: "loadingview" });
 			const inputs = document.querySelectorAll("input");
 			const dataConf = {
 				url: inputs[0].value,
@@ -31,6 +32,7 @@ export default {
 			ipcRenderer.send("create-config", dataConf);
 		},
 		setConfig() {
+			this.$router.push({ name: "loadingview" });
 			const configPath = document.querySelector("#configpath").value;
 			ipcRenderer.send("set-config", configPath);
 		},

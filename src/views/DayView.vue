@@ -45,6 +45,7 @@ export default {
 				`${this.$store.state.currentYear} ${this.$store.state
 					.currentMonth + 1}, ${this.$store.state.clickedDate}`
 			);
+			let offSetEle = 0;
 			this.$store.state.events.forEach((ele, index) => {
 				const event = this.createEvent(ele, d);
 				if (event) {
@@ -64,12 +65,20 @@ export default {
 					const offSetsArr = document.querySelectorAll(
 						".eventDayLabel"
 					);
-					offSetsArr.forEach((ele) => {
+
+					offSetsArr.forEach((ele, index) => {
+						console.log(topOffset);
+						console.log(ele.offsetTop);
+
 						if (
-							topOffset >= ele.offsetTop &&
-							topOffset <= ele.offsetTop + ele.clientHeight
+							topOffset + 80 >= ele.offsetTop &&
+							topOffset + 80 <= ele.offsetTop + ele.clientHeight
 						) {
-							event.style.left = duration ? "315px" : "0";
+							offSetEle++;
+							console.log(offSetEle);
+							event.style.left = duration
+								? `${315 * offSetEle}px`
+								: "0";
 						}
 					});
 					if (duration) {
@@ -189,6 +198,7 @@ export default {
 	text-align: center;
 	padding: 0 5px 0 5px;
 	transition: background-color 0.4s, font-size 0.4s;
+	border: 1px solid;
 }
 .eventDayLabel:hover {
 	cursor: pointer;

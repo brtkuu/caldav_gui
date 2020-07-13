@@ -19,6 +19,7 @@ import saveConfigFile from "../src/mainComponents/saveConfigFile";
 import checkConfig from "../src/mainComponents/checkConfig";
 import syncCalendar from "../src/mainComponents/syncCalendar";
 import discoverCal from "../src/mainComponents/discoverCalendar";
+import deleteEvent from "../src/mainComponents/deleteEvent";
 
 const readdir = util.promisify(fs.readdir);
 
@@ -27,10 +28,6 @@ const readfile = util.promisify(fs.readFile);
 const fromEntries = require("fromentries");
 
 const pathExists = util.promisify(fs.exists);
-
-const unlink = util.promisify(fs.unlink);
-
-const exec = util.promisify(require("child_process").exec);
 
 let confPath = "";
 let calDirs = {};
@@ -206,7 +203,6 @@ ipcMain.on("calendar-start", async (event, data) => {
 	const exists = await pathExists(
 		`${os.homedir()}/.config/sealcal/config.txt`
 	);
-	console.log(exists);
 	if (exists) {
 		const conf = await readfile(
 			`${os.homedir()}/.config/sealcal/config.txt`,
@@ -231,7 +227,6 @@ ipcMain.on("calendar-start", async (event, data) => {
 		event.sender.send("config-correct", calDirs.collections);
 	} else {
 		event.sender.send("config-error", "No config file");
-		console.error(err);
 		return;
 	}
 });
@@ -252,7 +247,15 @@ ipcMain.on("createEvent", (event, data) => {
 		data.status
 	}\nDTSTART;${startDate}\nDTEND;${endDate}${freq}\nEND:VEVENT\nEND:VCALENDAR`;
 
-	fs.writeFile(`${calDirs.path}/${data.collection}/${ID}.ics`, newEvent);
+	fs.writeFile(
+		`${calDirs.path}/${data.collection}/${ID}.ics`,
+		newEvent,
+		(err) => {
+			if (err) {
+				throw err;
+			}
+		}
+	);
 });
 
 ipcMain.on("get-data", (event, data) => {
@@ -297,17 +300,13 @@ ipcMain.on("get-data", (event, data) => {
 	myF();
 });
 
-ipcMain.on("deleteEvent", (event, data) => {
-	calDirs.collections.forEach(async (ele) => {
-		const exists = await pathExists(`${calDirs.path}/${ele}/${data}.ics`);
-		if (exists) {
-			unlink(`${calDirs.path}/${ele}/${data}.ics`);
-		}
-	});
+ipcMain.on("deleteEvent", async (event, data) => {
+	deleteEvent(calDirs, data);
+	await syncCalendar(confPath);
 });
 ipcMain.on("set-config", async (event, data) => {
-	const res = await saveConfigFile(data);
-	event.sender.send("set-correct", res);
+	confPath = await saveConfigFile(data);
+	event.sender.send("set-correct", confPath);
 });
 
 ipcMain.on("create-config", (event, data) => {
@@ -371,7 +370,9 @@ password = "${data.password}"
 						throw err;
 					}
 					await saveConfigFile(`${os.homedir()}/sealcalendar/config`);
+					confPath = `${os.homedir()}/sealcalendar/config`;
 					await discoverCal(confPath);
+					console.log("main sync");
 					event.sender.send("config-created", "Config correct");
 				}
 			);

@@ -62,7 +62,6 @@ export default {
 			const selectCollection = document.getElementById("collection")
 				.value;
 			const selectFreq = document.getElementById("freq").value;
-			console.log(selectStatus);
 			const event = {
 				allDay: inputs[1].checked,
 				start: [

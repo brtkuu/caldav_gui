@@ -4,11 +4,16 @@ import MonthView from "./views/Month.vue";
 import AgendaView from "./views/AgendaView.vue";
 import DayView from "./views/DayView.vue";
 import LoginView from "./views/LoginView.vue";
+import LoadingView from "./views/LoadingView.vue";
 
 Vue.use(Router);
 
 export default new Router({
-	routes: [
+	routes: [{
+			path: "/",
+			name: "loadingview",
+			component: LoadingView,
+		},
 		{
 			path: "/month",
 			name: "monthview",

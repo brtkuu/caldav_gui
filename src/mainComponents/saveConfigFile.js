@@ -6,11 +6,13 @@ function saveConfigFile(configFile) {
 		fs.writeFile(
 			`${os.homedir()}/.config/sealcal/config.txt`,
 			configFile,
+			{ flag: "w" },
 			(err) => {
+				console.log(configFile);
 				if (err) {
+					console.log(err);
 					throw err;
 				}
-				confPath = configFile;
 				resolve(configFile);
 			}
 		);
