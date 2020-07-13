@@ -7,15 +7,18 @@ import {
 	createProtocol,
 	installVueDevtools,
 } from "vue-cli-plugin-electron-builder/lib";
-import { exec } from "child_process";
 
 import uid from "uid";
-import { rejects } from "assert";
 
-const ical = require("ical");
-const fs = require("fs");
-const util = require("util");
-const os = require("os");
+import ical from "ical";
+import fs from "fs";
+import util from "util";
+import os from "os";
+import createEventDate from "../src/mainComponents/createEventDates";
+import saveConfigFile from "../src/mainComponents/saveConfigFile";
+import checkConfig from "../src/mainComponents/checkConfig";
+import syncCalendar from "../src/mainComponents/syncCalendar";
+import discoverCal from "../src/mainComponents/discoverCalendar";
 
 const readdir = util.promisify(fs.readdir);
 
@@ -24,6 +27,10 @@ const readfile = util.promisify(fs.readFile);
 const fromEntries = require("fromentries");
 
 const pathExists = util.promisify(fs.exists);
+
+const unlink = util.promisify(fs.unlink);
+
+const exec = util.promisify(require("child_process").exec);
 
 let confPath = "";
 let calDirs = {};
@@ -190,44 +197,43 @@ app.on("ready", async () => {
 	mainWindow = createMainWindow();
 });
 //Response on ipcRenderer.send
-ipcMain.on("syncCalendar", (event, data) => {
-	syncCalendar();
+ipcMain.on("syncCalendar", async (event, data) => {
+	await syncCalendar(confPath);
 });
 //Render process communication with main process
 
-ipcMain.on("calendar-start", (event, data) => {
-	fs.readFile(
-		`${os.homedir()}/.config/sealcal/config.txt`,
-		{
-			encoding: "utf-8",
-		},
-		(err, data) => {
-			if (err) {
-				event.sender.send("config-error", "No config file");
-				console.error(err);
-				return;
-			}
-			confPath = data;
-			syncCalendar(data);
-			readfile(confPath, "utf-8").then((res) => {
-				calDirs = fromEntries(
-					res.split("\n").map((line) => line.split(" = "))
-				);
-			});
-
-			syncCalendar().then(() => {
-				const collec = calDirs.collections.split(/\["|\"]|"|,| /g);
-				calDirs.collections = [];
-				collec.forEach((ele) => {
-					if (ele) {
-						calDirs.collections.push(ele);
-					}
-				});
-				calDirs.path = calDirs.path.split('"')[1];
-				event.sender.send("config-correct", calDirs.collections);
-			});
-		}
+ipcMain.on("calendar-start", async (event, data) => {
+	const exists = await pathExists(
+		`${os.homedir()}/.config/sealcal/config.txt`
 	);
+	console.log(exists);
+	if (exists) {
+		const conf = await readfile(
+			`${os.homedir()}/.config/sealcal/config.txt`,
+			{
+				encoding: "utf-8",
+			}
+		);
+		confPath = conf;
+		await syncCalendar(confPath);
+		const res = await readfile(confPath, "utf-8");
+		calDirs = fromEntries(res.split("\n").map((line) => line.split(" = ")));
+
+		await syncCalendar(confPath);
+		const collec = calDirs.collections.split(/\["|\"]|"|,| /g);
+		calDirs.collections = [];
+		collec.forEach((ele) => {
+			if (ele) {
+				calDirs.collections.push(ele);
+			}
+		});
+		calDirs.path = calDirs.path.split('"')[1];
+		event.sender.send("config-correct", calDirs.collections);
+	} else {
+		event.sender.send("config-error", "No config file");
+		console.error(err);
+		return;
+	}
 });
 
 ipcMain.on("createEvent", (event, data) => {
@@ -236,67 +242,54 @@ ipcMain.on("createEvent", (event, data) => {
 
 	const endDate = createEventDate(data.end, data.allDay);
 
+	const freq = data.freq ? `\nRRULE:FREQ=${data.freq}` : "";
+
 	const newEvent = `BEGIN:VCALENDAR\nPRODID:-//Nextcloud calendar v1.6.5\nVERSION:2.0\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nUID:${ID}\nSUMMARY:${
 		data.title
 	}\nDESCRIPTION:${data.description}\nLOCATION:${
 		data.location
 	}\nCLASS:PUBLIC\nSTATUS:${
 		data.status
-	}\nDTSTART;${startDate}\nDTEND;${endDate}\nEND:VEVENT\nEND:VCALENDAR`;
+	}\nDTSTART;${startDate}\nDTEND;${endDate}${freq}\nEND:VEVENT\nEND:VCALENDAR`;
 
 	fs.writeFile(`${calDirs.path}/${data.collection}/${ID}.ics`, newEvent);
 });
 
 ipcMain.on("get-data", (event, data) => {
 	async function myF() {
-		syncCalendar();
-		await calDirs.collections.forEach(async (ele) => {
-			try {
-				await readdir(`${calDirs.path}/${ele}`).then((names) => {
-					console.log(names);
-					if (names === undefined) {
-						console.log("undefined");
-					} else {
-						names.forEach((file) => {
-							const data = ical.parseFile(
-								`${calDirs.path}/${ele}/${file}`
-							);
-							if (data[Object.keys(data)[0]].rrule) {
-								readfile(`${calDirs.path}/${ele}/${file}`, {
-									encoding: "utf-8",
-								})
-									.then((res) => {
-										res = res.slice(0, 400);
-										console.log(res);
-										const fileData = fromEntries(
-											res
-												.split("\n")
-												.map((line) => line.split(":"))
-										);
-										const frequency = fileData.RRULE.split(
-											"="
-										);
-										data[Object.keys(data)[0]].rrule =
-											frequency[1];
-										console.log(data[Object.keys(data)[0]]);
-									})
-									.then(() => {
-										event.sender.send(
-											"got-data",
-											data[Object.keys(data)[0]]
-										);
-									});
-							} else {
-								event.sender.send(
-									"got-data",
-									data[Object.keys(data)[0]]
-								);
+		calDirs.collections.forEach(async (ele) => {
+			const names = await readdir(`${calDirs.path}/${ele}`);
+			if (names === undefined) {
+				console.log("undefined");
+			} else {
+				names.forEach(async (file) => {
+					const data = ical.parseFile(
+						`${calDirs.path}/${ele}/${file}`
+					);
+					if (data[Object.keys(data)[0]].rrule) {
+						let res = await readfile(
+							`${calDirs.path}/${ele}/${file}`,
+							{
+								encoding: "utf-8",
 							}
-						});
+						);
+						res = res.slice(0, 400);
+						const fileData = fromEntries(
+							res.split("\n").map((line) => line.split(":"))
+						);
+						const frequency = fileData.RRULE.split("=");
+						data[Object.keys(data)[0]].rrule = frequency[1];
+						event.sender.send(
+							"got-data",
+							data[Object.keys(data)[0]]
+						);
+					} else {
+						event.sender.send(
+							"got-data",
+							data[Object.keys(data)[0]]
+						);
 					}
 				});
-			} catch (err) {
-				throw err;
 			}
 		});
 	}
@@ -305,25 +298,16 @@ ipcMain.on("get-data", (event, data) => {
 });
 
 ipcMain.on("deleteEvent", (event, data) => {
-	syncCalendar();
-	calDirs.collections.forEach((ele) => {
-		pathExists(`${calDirs.path}/${ele}/${data}.ics`).then((exists) => {
-			if (exists) {
-				fs.unlink(`${calDirs.path}/${ele}/${data}.ics`, (err) => {
-					if (err) {
-						throw err;
-					} else {
-						console.log(`File ${data}.ics deleted!`);
-					}
-				});
-			}
-		});
+	calDirs.collections.forEach(async (ele) => {
+		const exists = await pathExists(`${calDirs.path}/${ele}/${data}.ics`);
+		if (exists) {
+			unlink(`${calDirs.path}/${ele}/${data}.ics`);
+		}
 	});
 });
-ipcMain.on("set-config", (event, data) => {
-	saveConfigFile(data).then(() => {
-		event.sender.send("set-correct", "config set-correct");
-	});
+ipcMain.on("set-config", async (event, data) => {
+	const res = await saveConfigFile(data);
+	event.sender.send("set-correct", res);
 });
 
 ipcMain.on("create-config", (event, data) => {
@@ -339,7 +323,6 @@ ipcMain.on("create-config", (event, data) => {
 								throw err;
 							}
 							data.collections.forEach((ele) => {
-								console.log(ele);
 								fs.mkdir(
 									`${os.homedir()}/sealcalendar/calendar_files/${ele}`
 								);
@@ -359,7 +342,6 @@ ipcMain.on("create-config", (event, data) => {
 				}
 			});
 			collections += "]";
-			console.log(collections);
 			const config = `[general]
 status_path = "${os.homedir()}/sealcalendar/status"
 
@@ -389,76 +371,9 @@ password = "${data.password}"
 						throw err;
 					}
 					await saveConfigFile(`${os.homedir()}/sealcalendar/config`);
-					discoverCal().then(() => {
-						event.sender.send("config-created", "Config correct");
-					});
+					await discoverCal(confPath);
+					event.sender.send("config-created", "Config correct");
 				}
 			);
 		});
 });
-
-//functions
-function syncCalendar() {
-	return new Promise((resolve, reject) => {
-		exec(`vdirsyncer -c ${confPath} sync`, (err, stdout, stderr) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
-			resolve(stdout);
-		});
-	});
-}
-
-function createEventDate(date, allDay) {
-	return `${
-		allDay
-			? `VALUE=DATE:${date[0]}${
-					`${date[1]}`.length == 2 ? date[1] : "0" + date[1]
-			  }${`${date[2]}`.length == 2 ? date[2] : "0" + date[2]}`
-			: `TZID=Europe/Warsaw:${date[0]}${
-					`${date[1]}`.length == 2 ? date[1] : "0" + date[1]
-			  }${`${date[2]}`.length == 2 ? date[2] : "0" + date[2]}T${
-					`${date[3]}`.length == 2 ? date[3] : "0" + date[3]
-			  }${`${date[4]}`.length == 2 ? date[4] : "0" + date[4]}00`
-	}`;
-}
-
-function checkConfig() {
-	fs.exists(`${os.homedir()}/.config/sealcal`, (exists) => {
-		if (!exists) {
-			fs.mkdir(`${os.homedir()}/.config/sealcal`, (err) => {
-				if (err) {
-					throw err;
-				}
-			});
-		}
-	});
-}
-
-function saveConfigFile(configFile) {
-	return new Promise((resolve, reject) => {
-		fs.writeFile(
-			`${os.homedir()}/.config/sealcal/config.txt`,
-			configFile,
-			(err) => {
-				if (err) {
-					throw err;
-				}
-				confPath = configFile;
-				resolve(configFile);
-			}
-		);
-	});
-}
-
-function discoverCal() {
-	return new Promise((resolve, reject) => {
-		exec(`vdirsyncer -c ${confPath} discover`, (err, stdout, stderr) => {
-			if (err) {
-				throw err;
-			}
-			resolve(stdout);
-		});
-	});
-}

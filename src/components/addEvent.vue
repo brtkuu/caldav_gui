@@ -5,29 +5,44 @@
       <input type="text" name="title" id="title" />
       <br />
       <label for="allday">All day event:</label>
-      <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent" />
+      <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent" checked/>
       <br />
       <label for="start">Start hour:</label>
-      <input type="time" name="start" id="start" />
+      <input type="time" name="start" id="start" disabled/>
       <label for="end">End hour:</label>
-      <input type="time" name="end" id="end" />
+      <input type="time" name="end" id="end" disabled/>
       <label for="description">
-        Description: 
+        Description:
         <br />
       </label>
       <textarea name="description" id="description" cols="70" rows="5"></textarea>
-      <label for="location">Location: </label>
-      <input type="text" name="location" id="location" /><br>
-	  <label for="status">Status: </label>
-	  <select name="status" id="status">
-		  <option value="CONFIRMED">Confirmed</option>
-		  <option value="TENTATIVE">Tentative</option>
-		  <option value="CANCELLED">Cancelled</option>
-	  </select><br>
-	  <label for="collection">Collection: </label>
-	  <select name="collection" id="collection">
-		  <option v-for="(collection, index) in this.$store.state.collections" :key="index">{{ collection }} </option>
-	  </select>
+      <label for="location">Location:</label>
+      <input type="text" name="location" id="location" />
+      <br />
+      <label for="status">Status:</label>
+      <select name="status" id="status">
+        <option value="CONFIRMED">Confirmed</option>
+        <option value="TENTATIVE">Tentative</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+      <br />
+      <label for="collection">Collection:</label>
+      <select name="collection" id="collection">
+        <option
+          v-for="(collection, index) in this.$store.state.collections"
+          :key="index"
+        >{{ collection }}</option>
+      </select>
+      <br />
+      <label for="repeat">Repeating:</label>
+      <select name="repeat" id="freq">
+        <option value="NONE">None</option>
+        <option value="DAYLI">Every day</option>
+        <option value="WEEKLY">Every week</option>
+        <option value="MONTHLY">Every month</option>
+        <option value="YEARLY">Every year</option>
+      </select>
+      <br />
     </form>
     <button @click="addEvent()">Add</button>
     <div @click="closeAddView" class="close"></div>
@@ -46,6 +61,7 @@ export default {
 			const selectStatus = document.getElementById("status").value;
 			const selectCollection = document.getElementById("collection")
 				.value;
+			const selectFreq = document.getElementById("freq").value;
 			console.log(selectStatus);
 			const event = {
 				allDay: inputs[1].checked,
@@ -68,6 +84,7 @@ export default {
 				location: inputs[4].value,
 				status: selectStatus,
 				collection: selectCollection,
+				freq: selectFreq != "NONE" ? selectFreq : null,
 			};
 			ipcRenderer.send("createEvent", event);
 			this.$store.state.events = [];
@@ -97,7 +114,7 @@ export default {
 <style scoped>
 .container {
 	width: 420px;
-	height: 400px;
+	height: 440px;
 	border: 1px solid;
 	background-color: #fff;
 }

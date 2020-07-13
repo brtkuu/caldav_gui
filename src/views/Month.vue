@@ -23,190 +23,186 @@
 import Router from "vue-router";
 
 export default {
-	name: "MonthView",
-	date() {
-		return {
-			currentDate: undefined,
-			months: undefined,
-			monthNumber: undefined,
-			year: undefined,
-		};
-	},
-	methods: {
-		// drawing calendar table with correct days of week
-		zeroPad(num, places) {
-			String(num).padStart(places, "0");
-		},
-		createTable() {
-			for (let i = 1; i < 32; i++) {
-				const calendarElement = document.createElement("div");
-				const calendarElementLabel = document.createElement("p");
-				calendarElement.id = i;
-				calendarElementLabel.id = i;
-				calendarElementLabel.classList.add("dayLabel");
-				calendarElement.classList.add("day");
-				const d = new Date(
-					`${this.months[this.$store.state.currentMonth]} ${i}, ${
-						this.$store.state.currentYear
-					}`
-				);
-				if (i == 1) {
-					if (!d.getDay()) {
-						calendarElement.style.gridColumn = 7;
-					} else {
-						calendarElement.style.gridColumn = d.getDay();
-					}
-				}
-				if (this.checkToday(d)) {
-					calendarElementLabel.style.color = "red";
-					calendarElementLabel.style.fontSize = "23px";
-					calendarElementLabel.style.textDecoration = "underline";
-				}
-				calendarElementLabel.innerHTML = i;
-				calendarElement.appendChild(calendarElementLabel);
-				this.$store.state.events.forEach((ele, index) => {
-					const event = this.dispEvent(ele, d);
-					if (event) {
-						event.id = i;
-						calendarElement.appendChild(event);
-					}
-				});
+  name: "MonthView",
+  date() {
+    return {
+      currentDate: undefined,
+      months: undefined,
+      monthNumber: undefined,
+      year: undefined
+    };
+  },
+  methods: {
+    // drawing calendar table with correct days of week
+    zeroPad(num, places) {
+      String(num).padStart(places, "0");
+    },
+    createTable() {
+      for (let i = 1; i < 32; i++) {
+        const calendarElement = document.createElement("div");
+        const calendarElementLabel = document.createElement("p");
+        calendarElement.id = i;
+        calendarElementLabel.id = i;
+        calendarElementLabel.classList.add("dayLabel");
+        calendarElement.classList.add("day");
+        const d = new Date(
+          `${this.months[this.$store.state.currentMonth]} ${i}, ${
+            this.$store.state.currentYear
+          }`
+        );
+        if (i == 1) {
+          if (!d.getDay()) {
+            calendarElement.style.gridColumn = 7;
+          } else {
+            calendarElement.style.gridColumn = d.getDay();
+          }
+        }
+        if (this.checkToday(d)) {
+          calendarElementLabel.style.color = "red";
+          calendarElementLabel.style.fontSize = "23px";
+          calendarElementLabel.style.textDecoration = "underline";
+        }
+        calendarElementLabel.innerHTML = i;
+        calendarElement.appendChild(calendarElementLabel);
+        this.$store.state.events.forEach((ele, index) => {
+          const event = this.dispEvent(ele, d);
+          if (event) {
+            event.id = i;
+            calendarElement.appendChild(event);
+          }
+        });
 
-				if (
-					d.getDay() + 1 &&
-					this.months[d.getMonth()] ==
-						this.months[this.$store.state.currentMonth]
-				) {
-					document
-						.querySelector(".dayOfMonth")
-						.appendChild(calendarElement);
-				} else {
-					break;
-				}
-			}
-		},
-		setLabel() {
-			const monthInfo = document.querySelector(".monthLabel");
-			monthInfo.innerHTML =
-				this.months[this.$store.state.currentMonth] +
-				" " +
-				this.$store.state.currentYear;
-		},
-		change(direction) {
-			if (direction) {
-				if (this.$store.state.currentMonth == 11) {
-					this.$store.state.currentMonth = 0;
-					this.$store.commit("incrementYear");
-				} else {
-					this.$store.commit("incrementMonth");
-				}
-			} else {
-				if (this.$store.state.currentMonth == 0) {
-					this.$store.state.currentMonth = 11;
-					this.$store.commit("decrementYear");
-				} else {
-					this.$store.commit("decrementMonth");
-				}
-			}
-			document.querySelector(".dayOfMonth").innerHTML = "";
-			this.setLabel();
-			this.createTable();
-		},
-		clicked() {
-			const month = document.querySelector(".monthLabel").innerText;
-			const monthArr = month.split(" ");
-			this.$store.state.currentMonth = this.$store.state.months.indexOf(
-				monthArr[0]
-			);
-			this.$store.state.clickedDate = event.target.id;
-			this.$store.state.currentYear = monthArr[1] * 1;
-			this.$router.push({ name: "agendaview" });
-		},
-		dispEvent(ele, d) {
-			console.log(ele.rrule);
-			const eventDateStart = new Date(ele.start);
-			const eventDateEnd = new Date(ele.end);
-			if (
-				(eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth() &&
-					eventDateStart.getFullYear() == d.getFullYear()) ||
-				(ele.rrule == "WEEKLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					d.getDay() == eventDateStart.getDay()) ||
-				(ele.rrule == "DAILY" &&
-					eventDateStart.getTime() < d.getTime()) ||
-				(ele.rrule == "MONTHLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getDate() == d.getDate()) ||
-				(ele.rrule == "YEARLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getFullYear() < d.getFullYear() &&
-					eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth())
-			) {
-				const eventLabel = document.createElement("p");
-				const endHour =
-					eventDateEnd.getHours() != 0
-						? eventDateEnd.getHours()
-						: "0" + eventDateEnd.getHours();
-				const endMinutes =
-					`${eventDateEnd.getMinutes()}`.length == 2
-						? eventDateEnd.getMinutes()
-						: "0" + eventDateEnd.getMinutes();
+        if (
+          d.getDay() + 1 &&
+          this.months[d.getMonth()] ==
+            this.months[this.$store.state.currentMonth]
+        ) {
+          document.querySelector(".dayOfMonth").appendChild(calendarElement);
+        } else {
+          break;
+        }
+      }
+    },
+    setLabel() {
+      const monthInfo = document.querySelector(".monthLabel");
+      monthInfo.innerHTML =
+        this.months[this.$store.state.currentMonth] +
+        " " +
+        this.$store.state.currentYear;
+    },
+    change(direction) {
+      if (direction) {
+        if (this.$store.state.currentMonth == 11) {
+          this.$store.state.currentMonth = 0;
+          this.$store.commit("incrementYear");
+        } else {
+          this.$store.commit("incrementMonth");
+        }
+      } else {
+        if (this.$store.state.currentMonth == 0) {
+          this.$store.state.currentMonth = 11;
+          this.$store.commit("decrementYear");
+        } else {
+          this.$store.commit("decrementMonth");
+        }
+      }
+      document.querySelector(".dayOfMonth").innerHTML = "";
+      this.setLabel();
+      this.createTable();
+    },
+    clicked() {
+      const month = document.querySelector(".monthLabel").innerText;
+      const monthArr = month.split(" ");
+      this.$store.state.currentMonth = this.$store.state.months.indexOf(
+        monthArr[0]
+      );
+      this.$store.state.clickedDate = event.target.id;
+      this.$store.state.currentYear = monthArr[1] * 1;
+      this.$router.push({ name: "agendaview" });
+    },
+    dispEvent(ele, d) {
+      const eventDateStart = new Date(ele.start);
+      const eventDateEnd = new Date(ele.end);
+      if (
+        (eventDateStart.getDate() == d.getDate() &&
+          eventDateStart.getMonth() == d.getMonth() &&
+          eventDateStart.getFullYear() == d.getFullYear()) ||
+        (ele.rrule == "WEEKLY" &&
+          eventDateStart.getTime() < d.getTime() &&
+          d.getDay() == eventDateStart.getDay()) ||
+        (ele.rrule == "DAILY" && eventDateStart.getTime() < d.getTime()) ||
+        (ele.rrule == "MONTHLY" &&
+          eventDateStart.getTime() < d.getTime() &&
+          eventDateStart.getDate() == d.getDate()) ||
+        (ele.rrule == "YEARLY" &&
+          eventDateStart.getTime() < d.getTime() &&
+          eventDateStart.getFullYear() < d.getFullYear() &&
+          eventDateStart.getDate() == d.getDate() &&
+          eventDateStart.getMonth() == d.getMonth())
+      ) {
+        const eventLabel = document.createElement("p");
+        const endHour =
+          eventDateEnd.getHours() != 0
+            ? eventDateEnd.getHours()
+            : "0" + eventDateEnd.getHours();
+        const endMinutes =
+          `${eventDateEnd.getMinutes()}`.length == 2
+            ? eventDateEnd.getMinutes()
+            : "0" + eventDateEnd.getMinutes();
 
-				const startHour =
-					eventDateStart.getHours() != 0
-						? eventDateStart.getHours()
-						: "0" + eventDateStart.getHours();
-				const startMinutes =
-					`${eventDateStart.getMinutes()}`.length == 2
-						? eventDateStart.getMinutes()
-						: "0" + eventDateStart.getMinutes();
+        const startHour =
+          eventDateStart.getHours() != 0
+            ? eventDateStart.getHours()
+            : "0" + eventDateStart.getHours();
+        const startMinutes =
+          `${eventDateStart.getMinutes()}`.length == 2
+            ? eventDateStart.getMinutes()
+            : "0" + eventDateStart.getMinutes();
 
-				eventLabel.innerHTML = `${
-					startHour &&
-					startMinutes &&
-					(startHour != endHour || startMinutes != endMinutes)
-						? startHour + ":" + startMinutes
-						: ""
-				} ${ele.summary}`;
-				eventLabel.classList.add("eventLabel");
-				return eventLabel;
-			}
-			return null;
-		},
-		checkToday(d) {
-			const today = new Date();
-			if (
-				d.getDate() == today.getDate() &&
-				d.getMonth() == today.getMonth() &&
-				d.getFullYear() == today.getFullYear()
-			) {
-				return true;
-			}
-			return false;
-		},
-	},
-	mounted() {
-		document.querySelector(".dayOfMonth").innerHTML = "";
-		(this.months = [
-			"January",
-			"February",
-			"March",
-			"April",
-			"May",
-			"June",
-			"July",
-			"August",
-			"September",
-			"October",
-			"November",
-			"December",
-		]),
-			this.setLabel();
-		this.createTable();
-		this.$store.commit("closeAddEventView");
-	},
+        eventLabel.innerHTML = `${
+          startHour &&
+          startMinutes &&
+          (startHour != endHour || startMinutes != endMinutes)
+            ? startHour + ":" + startMinutes
+            : ""
+        } ${ele.summary}`;
+        eventLabel.classList.add("eventLabel");
+        return eventLabel;
+      }
+      return null;
+    },
+    checkToday(d) {
+      const today = new Date();
+      if (
+        d.getDate() == today.getDate() &&
+        d.getMonth() == today.getMonth() &&
+        d.getFullYear() == today.getFullYear()
+      ) {
+        return true;
+      }
+      return false;
+    }
+  },
+  mounted() {
+    document.querySelector(".dayOfMonth").innerHTML = "";
+    (this.months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ]),
+      this.setLabel();
+    this.createTable();
+    this.$store.commit("closeAddEventView");
+  }
 };
 </script>
 <style lang="css">
