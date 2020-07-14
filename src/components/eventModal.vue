@@ -58,14 +58,9 @@ export default {
 		},
 		deleteEvent() {
 			ipcRenderer.send("deleteEvent", event.target.id);
-			this.$store.commit("closeInfoEventView");
-			this.$store.state.events = [];
-			this.$store.commit("updateEvents");
-			setTimeout(() => {
-				const location = this.$route.fullPath;
-				this.$router.replace("/");
-				this.$nextTick(() => this.$router.replace(location));
-			}, 100);
+			ipcRenderer.once("item-deleted", (event, data) => {
+				ipcRenderer.send("get-data");
+			});
 		},
 	},
 	mounted() {

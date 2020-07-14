@@ -119,15 +119,6 @@ export default new Vuex.Store({
 		updateEvents(state) {
 			state.events = [];
 			ipcRenderer.send("get-data");
-
-			setTimeout(() => {
-				state.events.sort(function(a, b) {
-					a = new Date(a.start);
-					b = new Date(b.start);
-					return a.getTime() - b.getTime();
-				});
-				console.log(state.events);
-			}, 100);
 		},
 	},
 	actions: {},

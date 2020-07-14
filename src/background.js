@@ -20,6 +20,8 @@ import checkConfig from "../src/mainComponents/checkConfig";
 import syncCalendar from "../src/mainComponents/syncCalendar";
 import discoverCal from "../src/mainComponents/discoverCalendar";
 import deleteEvent from "../src/mainComponents/deleteEvent";
+import getData from "../src/mainComponents/getData";
+import createEvent from "../src/mainComponents/createEvent";
 
 const readdir = util.promisify(fs.readdir);
 
@@ -196,6 +198,7 @@ app.on("ready", async () => {
 //Response on ipcRenderer.send
 ipcMain.on("syncCalendar", async (event, data) => {
 	await syncCalendar(confPath);
+	event.sender.send("refreshview");
 });
 //Render process communication with main process
 
@@ -225,6 +228,7 @@ ipcMain.on("calendar-start", async (event, data) => {
 		});
 		calDirs.path = calDirs.path.split('"')[1];
 		event.sender.send("config-correct", calDirs.collections);
+		event.sender.send("refreshview");
 	} else {
 		event.sender.send("config-error", "No config file");
 		return;
@@ -233,75 +237,51 @@ ipcMain.on("calendar-start", async (event, data) => {
 
 ipcMain.on("createEvent", (event, data) => {
 	const ID = uid(16).toUpperCase();
-	const startDate = createEventDate(data.start, data.allDay);
+	createEvent(data, calDirs, ID);
+	// const ID = uid(16).toUpperCase();
+	// const startDate = createEventDate(data.start, data.allDay);
 
-	const endDate = createEventDate(data.end, data.allDay);
+	// const endDate = createEventDate(data.end, data.allDay);
 
-	const freq = data.freq ? `\nRRULE:FREQ=${data.freq}` : "";
+	// const freq = data.freq ? `\nRRULE:FREQ=${data.freq}` : "";
 
-	const newEvent = `BEGIN:VCALENDAR\nPRODID:-//Nextcloud calendar v1.6.5\nVERSION:2.0\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nUID:${ID}\nSUMMARY:${
-		data.title
-	}\nDESCRIPTION:${data.description}\nLOCATION:${
-		data.location
-	}\nCLASS:PUBLIC\nSTATUS:${
-		data.status
-	}\nDTSTART;${startDate}\nDTEND;${endDate}${freq}\nEND:VEVENT\nEND:VCALENDAR`;
+	// const newEvent = `BEGIN:VCALENDAR\nPRODID:-//Nextcloud calendar v1.6.5\nVERSION:2.0\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nUID:${ID}\nSUMMARY:${
+	// 	data.title
+	// }\nDESCRIPTION:${data.description}\nLOCATION:${
+	// 	data.location
+	// }\nCLASS:PUBLIC\nSTATUS:${
+	// 	data.status
+	// }\nDTSTART;${startDate}\nDTEND;${endDate}${freq}\nEND:VEVENT\nEND:VCALENDAR`;
 
-	fs.writeFile(
-		`${calDirs.path}/${data.collection}/${ID}.ics`,
-		newEvent,
-		(err) => {
-			if (err) {
-				throw err;
-			}
-		}
-	);
+	// fs.writeFile(
+	// 	`${calDirs.path}/${data.collection}/${ID}.ics`,
+	// 	newEvent,
+	// 	(err) => {
+	// 		if (err) {
+	// 			throw err;
+	// 		}
+	// 	}
+	// );
 });
 
-ipcMain.on("get-data", (event, data) => {
-	async function myF() {
-		calDirs.collections.forEach(async (ele) => {
-			const names = await readdir(`${calDirs.path}/${ele}`);
-			if (names === undefined) {
-				console.log("undefined");
-			} else {
-				names.forEach(async (file) => {
-					const data = ical.parseFile(
-						`${calDirs.path}/${ele}/${file}`
-					);
-					if (data[Object.keys(data)[0]].rrule) {
-						let res = await readfile(
-							`${calDirs.path}/${ele}/${file}`,
-							{
-								encoding: "utf-8",
-							}
-						);
-						res = res.slice(0, 400);
-						const fileData = fromEntries(
-							res.split("\n").map((line) => line.split(":"))
-						);
-						const frequency = fileData.RRULE.split("=");
-						data[Object.keys(data)[0]].rrule = frequency[1];
-						event.sender.send(
-							"got-data",
-							data[Object.keys(data)[0]]
-						);
-					} else {
-						event.sender.send(
-							"got-data",
-							data[Object.keys(data)[0]]
-						);
-					}
-				});
-			}
-		});
-	}
+ipcMain.on("get-data", async (event, data) => {
+	const events = await getData(calDirs);
+	events.sort(function(a, b) {
+		a = new Date(a.start);
+		b = new Date(b.start);
+		return a.getTime() - b.getTime();
+	});
 
-	myF();
+	event.sender.send("got-data", events);
+	console.log("refresh");
+	event.sender.send("refreshview", "View Refreshed");
+	await syncCalendar(confPath);
 });
 
 ipcMain.on("deleteEvent", async (event, data) => {
-	deleteEvent(calDirs, data);
+	console.log("delete");
+	await deleteEvent(calDirs, data);
+	event.sender.send("item-deleted", "deleted");
 	await syncCalendar(confPath);
 });
 ipcMain.on("set-config", async (event, data) => {

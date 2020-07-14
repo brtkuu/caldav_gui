@@ -3,13 +3,13 @@ const util = require("util");
 const pathExists = util.promisify(fs.exists);
 const unlink = util.promisify(fs.unlink);
 
-function deleteEvent(calDirs, file) {
-	calDirs.collections.forEach(async (ele) => {
-		const exists = await pathExists(`${calDirs.path}/${ele}/${file}.ics`);
+async function deleteEvent(calDirs, file) {
+	for (ele of calDirs.collections) {
+		const exists = await pathExists(`${calDirs.path}${ele}/${file}.ics`);
 		if (exists) {
-			await unlink(`${calDirs.path}/${ele}/${file}.ics`);
-		} else {
+			const deleted = await unlink(`${calDirs.path}${ele}/${file}.ics`);
+			return deleted;
 		}
-	});
+	}
 }
 module.exports = deleteEvent;

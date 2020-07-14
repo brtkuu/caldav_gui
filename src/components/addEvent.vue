@@ -88,13 +88,7 @@ export default {
 			ipcRenderer.send("createEvent", event);
 			this.$store.state.events = [];
 			this.$store.commit("updateEvents");
-			this.$store.commit("closeAddEventView");
-			ipcRenderer.send("syncCalendar");
-			setTimeout(() => {
-				const location = this.$route.fullPath;
-				this.$router.replace("/");
-				this.$nextTick(() => this.$router.replace(location));
-			}, 100);
+			ipcRenderer.send("syncCalendar", event);
 		},
 		closeAddView() {
 			this.$store.commit("closeAddEventView");

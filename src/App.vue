@@ -22,11 +22,6 @@ export default {
 		syncCalendar() {
 			ipcRenderer.send("syncCalendar");
 			this.$store.commit("updateEvents");
-			setTimeout(() => {
-				const location = this.$route.fullPath;
-				this.$router.replace("/");
-				this.$nextTick(() => this.$router.replace(location));
-			}, 100);
 		},
 		today() {
 			this.$store.state.currentMonth = new Date().getMonth();
@@ -40,7 +35,8 @@ export default {
 	mounted() {
 		ipcRenderer.send("calendar-start");
 		ipcRenderer.on("got-data", (event, data) => {
-			this.$store.state.events.push(data);
+			console.log(data);
+			this.$store.state.events = data;
 		});
 		ipcRenderer.on("config-created", (event, data) => {
 			ipcRenderer.send("calendar-start");
@@ -58,12 +54,18 @@ export default {
 			this.$store.state.collections = data;
 			console.log(this.$store.state.collections);
 			console.log(data);
-			setTimeout(() => {
-				this.$router.push({ name: "monthview" });
-			}, 100);
+			this.$router.push({ name: "monthview" });
 		});
 		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
 		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
+		ipcRenderer.on("refreshview", (event, data) => {
+			console.log("refresh");
+			this.$store.commit("closeAddEventView");
+			this.$store.commit("closeInfoEventView");
+			const location = this.$route.fullPath;
+			this.$router.replace("/");
+			this.$nextTick(() => this.$router.replace(location));
+		});
 	},
 };
 </script>

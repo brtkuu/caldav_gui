@@ -67,15 +67,11 @@ export default {
 					);
 
 					offSetsArr.forEach((ele, index) => {
-						console.log(topOffset);
-						console.log(ele.offsetTop);
-
 						if (
 							topOffset + 80 >= ele.offsetTop &&
 							topOffset + 80 <= ele.offsetTop + ele.clientHeight
 						) {
 							offSetEle++;
-							console.log(offSetEle);
 							event.style.left = duration
 								? `${315 * offSetEle}px`
 								: "0";
@@ -152,7 +148,6 @@ export default {
 		},
 		clickEvent() {
 			if (event.target.id) {
-				console.log("click");
 				this.clickedEvent = this.$store.state.events[event.target.id];
 				this.$store.commit("openInfoEventView");
 			}
