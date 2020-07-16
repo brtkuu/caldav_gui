@@ -33,9 +33,9 @@ export default {
 				hourLabelFull.classList.add("hourLabel");
 				if (i == -1) {
 					hourLabelFull.innerHTML = `All Day`;
-				} else {
-					hourLabelFull.innerHTML = `${i}:00`;
+					continue;
 				}
+				hourLabelFull.innerHTML = `${i}:00`;
 				hourLabelFull.style.gridColumn = "1/2";
 				hoursTable.appendChild(hourLabelFull);
 			}
@@ -61,15 +61,15 @@ export default {
 					const topOffset = hours * 80 + minutes * 1.34;
 					const duration =
 						durationHours * 80 + durationMinutes * 1.34;
-					event.style.top = `${topOffset + (duration ? 80 : 0)}px`;
+					event.style.top = `${topOffset}px`;
 					const offSetsArr = document.querySelectorAll(
 						".eventDayLabel"
 					);
 
 					offSetsArr.forEach((ele, index) => {
 						if (
-							topOffset + 80 >= ele.offsetTop &&
-							topOffset + 80 <= ele.offsetTop + ele.clientHeight
+							topOffset >= ele.offsetTop &&
+							topOffset <= ele.offsetTop + ele.clientHeight
 						) {
 							offSetEle++;
 							event.style.left = duration
@@ -77,13 +77,14 @@ export default {
 								: "0";
 						}
 					});
-					if (duration) {
-						event.style.height = `${duration}px`;
-						event.style.lineHeight = `${durationHours * 80 +
-							durationMinutes * 1.34}px`;
-					} else {
+					if (!duration) {
 						event.classList.add("allDayEvent");
 					}
+					event.style.height = `${duration ? duration : 60}px`;
+					event.style.lineHeight = duration
+						? `${durationHours * 80 + durationMinutes * 1.34}px`
+						: 60 + "px";
+
 					document.querySelector(".hourDiv").appendChild(event);
 				}
 			});
@@ -91,54 +92,22 @@ export default {
 		createEvent(ele, d) {
 			const eventDateStart = new Date(ele.start);
 			const eventDateEnd = new Date(ele.end);
-			if (
-				(eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth() &&
-					eventDateStart.getFullYear() == d.getFullYear()) ||
-				(ele.rrule == "WEEKLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					d.getDay() == eventDateStart.getDay()) ||
-				(ele.rrule == "DAILY" &&
-					eventDateStart.getTime() < d.getTime()) ||
-				(ele.rrule == "MONTHLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getDate() == d.getDate()) ||
-				(ele.rrule == "YEARLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getFullYear() < d.getFullYear() &&
-					eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth())
-			) {
+			if (this.$isDate(ele, d)) {
 				const eventLabel = document.createElement("p");
-				const endHour =
-					eventDateEnd.getHours() != 0
-						? eventDateEnd.getHours()
-						: "0" + eventDateEnd.getHours();
-				const endMinutes =
-					`${eventDateEnd.getMinutes()}`.length == 2
-						? eventDateEnd.getMinutes()
-						: "0" + eventDateEnd.getMinutes();
-
-				const startHour =
-					eventDateStart.getHours() != 0
-						? eventDateStart.getHours()
-						: "0" + eventDateStart.getHours();
-				const startMinutes =
-					`${eventDateStart.getMinutes()}`.length == 2
-						? eventDateStart.getMinutes()
-						: "0" + eventDateStart.getMinutes();
+				const dates = this.$setDates(eventDateEnd, eventDateStart);
 
 				eventLabel.innerHTML = `${
-					startHour &&
-					startMinutes &&
-					(startHour != endHour || startMinutes != endMinutes)
-						? startHour +
+					dates.startHour &&
+					dates.startMinutes &&
+					(dates.startHour != dates.endHour ||
+						dates.startMinutes != dates.endMinutes)
+						? dates.startHour +
 						  ":" +
-						  startMinutes +
+						  dates.startMinutes +
 						  "-" +
-						  endHour +
+						  dates.endHour +
 						  ":" +
-						  endMinutes
+						  dates.endMinutes
 						: ""
 				} ${ele.summary}`;
 				eventLabel.classList.add("eventDayLabel");

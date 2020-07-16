@@ -1,34 +1,36 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain, Menu } from "electron";
+import {
+	app,
+	protocol,
+	BrowserWindow,
+	ipcMain,
+	Menu
+} from "electron";
 import * as path from "path";
-import { format as formatUrl } from "url";
+import {
+	format as formatUrl
+} from "url";
 import {
 	createProtocol,
 	installVueDevtools,
 } from "vue-cli-plugin-electron-builder/lib";
 
 import uid from "uid";
-
-import ical from "ical";
 import fs from "fs";
 import util from "util";
 import os from "os";
-import createEventDate from "../src/mainComponents/createEventDates";
 import saveConfigFile from "../src/mainComponents/saveConfigFile";
 import checkConfig from "../src/mainComponents/checkConfig";
 import syncCalendar from "../src/mainComponents/syncCalendar";
-import discoverCal from "../src/mainComponents/discoverCalendar";
 import deleteEvent from "../src/mainComponents/deleteEvent";
 import getData from "../src/mainComponents/getData";
 import createEvent from "../src/mainComponents/createEvent";
-
-const readdir = util.promisify(fs.readdir);
+import createDirectory from "../src/mainComponents/createDirectory";
+import createConfig from "../src/mainComponents/createConfig";
 
 const readfile = util.promisify(fs.readFile);
-
 const fromEntries = require("fromentries");
-
 const pathExists = util.promisify(fs.exists);
 
 let confPath = "";
@@ -60,11 +62,9 @@ function createMainWindow() {
 		minHeight: 600,
 	});
 
-	const menu = Menu.buildFromTemplate([
-		{
+	const menu = Menu.buildFromTemplate([{
 			label: "SealCal",
-			submenu: [
-				{
+			submenu: [{
 					label: "Configuration",
 					click() {
 						window.webContents.send(
@@ -80,8 +80,7 @@ function createMainWindow() {
 		},
 		{
 			label: "Edit",
-			submenu: [
-				{
+			submenu: [{
 					role: "undo",
 				},
 				{
@@ -99,43 +98,38 @@ function createMainWindow() {
 				{
 					role: "paste",
 				},
-				...(isMac
-					? [
-							{
-								role: "pasteAndMatchStyle",
+				...(isMac ? [{
+						role: "pasteAndMatchStyle",
+					},
+					{
+						role: "delete",
+					},
+					{
+						role: "selectAll",
+					},
+					{
+						type: "separator",
+					},
+					{
+						label: "Speech",
+						submenu: [{
+								role: "startspeaking",
 							},
 							{
-								role: "delete",
+								role: "stopspeaking",
 							},
-							{
-								role: "selectAll",
-							},
-							{
-								type: "separator",
-							},
-							{
-								label: "Speech",
-								submenu: [
-									{
-										role: "startspeaking",
-									},
-									{
-										role: "stopspeaking",
-									},
-								],
-							},
-					  ]
-					: [
-							{
-								role: "delete",
-							},
-							{
-								type: "separator",
-							},
-							{
-								role: "selectAll",
-							},
-					  ]),
+						],
+					},
+				] : [{
+						role: "delete",
+					},
+					{
+						type: "separator",
+					},
+					{
+						role: "selectAll",
+					},
+				]),
 			],
 		},
 	]);
@@ -206,67 +200,39 @@ ipcMain.on("calendar-start", async (event, data) => {
 	const exists = await pathExists(
 		`${os.homedir()}/.config/sealcal/config.txt`
 	);
-	if (exists) {
-		const conf = await readfile(
-			`${os.homedir()}/.config/sealcal/config.txt`,
-			{
-				encoding: "utf-8",
-			}
-		);
-		confPath = conf;
-		await syncCalendar(confPath);
-		const res = await readfile(confPath, "utf-8");
-		calDirs = fromEntries(res.split("\n").map((line) => line.split(" = ")));
-
-		await syncCalendar(confPath);
-		const collec = calDirs.collections.split(/\["|\"]|"|,| /g);
-		calDirs.collections = [];
-		collec.forEach((ele) => {
-			if (ele) {
-				calDirs.collections.push(ele);
-			}
-		});
-		calDirs.path = calDirs.path.split('"')[1];
-		event.sender.send("config-correct", calDirs.collections);
-		event.sender.send("refreshview");
-	} else {
+	if (!exists) {
 		event.sender.send("config-error", "No config file");
 		return;
 	}
+	const conf = await readfile(`${os.homedir()}/.config/sealcal/config.txt`, {
+		encoding: "utf-8",
+	});
+	confPath = conf;
+	await syncCalendar(confPath);
+	const res = await readfile(confPath, "utf-8");
+	calDirs = fromEntries(res.split("\n").map((line) => line.split(" = ")));
+
+	await syncCalendar(confPath);
+	const collec = calDirs.collections.split(/\["|\"]|"|,| /g);
+	calDirs.collections = [];
+	collec.forEach((ele) => {
+		if (ele) {
+			calDirs.collections.push(ele);
+		}
+	});
+	calDirs.path = calDirs.path.split('"')[1];
+	event.sender.send("config-correct", calDirs.collections);
+	event.sender.send("refreshview");
 });
 
 ipcMain.on("createEvent", (event, data) => {
 	const ID = uid(16).toUpperCase();
 	createEvent(data, calDirs, ID);
-	// const ID = uid(16).toUpperCase();
-	// const startDate = createEventDate(data.start, data.allDay);
-
-	// const endDate = createEventDate(data.end, data.allDay);
-
-	// const freq = data.freq ? `\nRRULE:FREQ=${data.freq}` : "";
-
-	// const newEvent = `BEGIN:VCALENDAR\nPRODID:-//Nextcloud calendar v1.6.5\nVERSION:2.0\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nUID:${ID}\nSUMMARY:${
-	// 	data.title
-	// }\nDESCRIPTION:${data.description}\nLOCATION:${
-	// 	data.location
-	// }\nCLASS:PUBLIC\nSTATUS:${
-	// 	data.status
-	// }\nDTSTART;${startDate}\nDTEND;${endDate}${freq}\nEND:VEVENT\nEND:VCALENDAR`;
-
-	// fs.writeFile(
-	// 	`${calDirs.path}/${data.collection}/${ID}.ics`,
-	// 	newEvent,
-	// 	(err) => {
-	// 		if (err) {
-	// 			throw err;
-	// 		}
-	// 	}
-	// );
 });
 
 ipcMain.on("get-data", async (event, data) => {
 	const events = await getData(calDirs);
-	events.sort(function(a, b) {
+	events.sort(function (a, b) {
 		a = new Date(a.start);
 		b = new Date(b.start);
 		return a.getTime() - b.getTime();
@@ -289,72 +255,8 @@ ipcMain.on("set-config", async (event, data) => {
 	event.sender.send("set-correct", confPath);
 });
 
-ipcMain.on("create-config", (event, data) => {
-	pathExists(`${os.homedir()}/sealcalendar`)
-		.then((exists) => {
-			if (!exists) {
-				fs.mkdir(`${os.homedir()}/sealcalendar`, (err) => {
-					fs.mkdir(`${os.homedir()}/sealcalendar/status`);
-					fs.mkdir(
-						`${os.homedir()}/sealcalendar/calendar_files`,
-						(err) => {
-							if (err) {
-								throw err;
-							}
-							data.collections.forEach((ele) => {
-								fs.mkdir(
-									`${os.homedir()}/sealcalendar/calendar_files/${ele}`
-								);
-							});
-						}
-					);
-				});
-			}
-		})
-		.then(() => {
-			let collections = "[";
-			data.collections.forEach((ele, index) => {
-				if (index != data.collections.length - 1) {
-					collections += `"${ele}",`;
-				} else {
-					collections += `"${ele}"`;
-				}
-			});
-			collections += "]";
-			const config = `[general]
-status_path = "${os.homedir()}/sealcalendar/status"
-
-[pair calendar]
-a = "seal_calendar"
-b = "local_calendar"
-collections = ${collections}
-conflict_resolution = "a wins"
-metadata = ["displayname"]
-
-[storage local_calendar]
-type = "filesystem"
-path = "${os.homedir()}/sealcalendar/calendar_files/"
-fileext = ".ics"
-
-[storage seal_calendar]
-type = "caldav"
-url = "${data.url}"
-username = "${data.login}"
-password = "${data.password}"
-	`;
-			fs.writeFile(
-				`${os.homedir()}/sealcalendar/config`,
-				config,
-				async (err) => {
-					if (err) {
-						throw err;
-					}
-					await saveConfigFile(`${os.homedir()}/sealcalendar/config`);
-					confPath = `${os.homedir()}/sealcalendar/config`;
-					await discoverCal(confPath);
-					console.log("main sync");
-					event.sender.send("config-created", "Config correct");
-				}
-			);
-		});
+ipcMain.on("create-config", async (event, data) => {
+	await createDirectory(data);
+	await createConfig(data);
+	event.sender.send("config-created", "Config correct");
 });

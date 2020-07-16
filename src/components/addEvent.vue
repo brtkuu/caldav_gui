@@ -41,7 +41,11 @@
         <option value="WEEKLY">Every week</option>
         <option value="MONTHLY">Every month</option>
         <option value="YEARLY">Every year</option>
-      </select>
+      </select><br>
+	  <label for="every">Repeat every: </label>
+	  <input type="number" for="every" disabled><br>
+	  <label for="every">End after: </label>
+	  <input type="number" for="every" disabled>
       <br />
     </form>
     <button @click="addEvent()">Add</button>
@@ -107,7 +111,7 @@ export default {
 <style scoped>
 .container {
 	width: 420px;
-	height: 440px;
+	height: 500px;
 	border: 1px solid;
 	background-color: #fff;
 }

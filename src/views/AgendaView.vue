@@ -50,48 +50,16 @@ export default {
 		createEvent(ele, d) {
 			const eventDateStart = new Date(ele.start);
 			const eventDateEnd = new Date(ele.end);
-			if (
-				(eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth() &&
-					eventDateStart.getFullYear() == d.getFullYear()) ||
-				(ele.rrule == "WEEKLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					d.getDay() == eventDateStart.getDay()) ||
-				(ele.rrule == "DAILY" &&
-					eventDateStart.getTime() < d.getTime()) ||
-				(ele.rrule == "MONTHLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getDate() == d.getDate()) ||
-				(ele.rrule == "YEARLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getFullYear() < d.getFullYear() &&
-					eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth())
-			) {
+			if (this.$isDate(ele, d)) {
 				const eventLabel = document.createElement("li");
-				const endHour =
-					eventDateEnd.getHours() != 0
-						? eventDateEnd.getHours()
-						: "0" + eventDateEnd.getHours();
-				const endMinutes =
-					`${eventDateEnd.getMinutes()}`.length == 2
-						? eventDateEnd.getMinutes()
-						: "0" + eventDateEnd.getMinutes();
-
-				const startHour =
-					eventDateStart.getHours() != 0
-						? eventDateStart.getHours()
-						: "0" + eventDateStart.getHours();
-				const startMinutes =
-					`${eventDateStart.getMinutes()}`.length == 2
-						? eventDateStart.getMinutes()
-						: "0" + eventDateStart.getMinutes();
+				const dates = this.$setDates(eventDateEnd, eventDateStart);
 
 				eventLabel.innerHTML = `${
-					startHour &&
-					startMinutes &&
-					(startHour != endHour || startMinutes != endMinutes)
-						? startHour + ":" + startMinutes
+					dates.startHour &&
+					dates.startMinutes &&
+					(dates.startHour != dates.endHour ||
+						dates.startMinutes != dates.endMinutes)
+						? dates.startHour + ":" + dates.startMinutes
 						: ""
 				} ${ele.summary}`;
 				eventLabel.classList.add("eventListLabel");

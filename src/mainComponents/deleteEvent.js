@@ -8,7 +8,7 @@ async function deleteEvent(calDirs, file) {
 		const exists = await pathExists(`${calDirs.path}${ele}/${file}.ics`);
 		if (exists) {
 			const deleted = await unlink(`${calDirs.path}${ele}/${file}.ics`);
-			return deleted;
+			break;
 		}
 	}
 }

@@ -53,9 +53,9 @@ export default {
 				if (i == 1) {
 					if (!d.getDay()) {
 						calendarElement.style.gridColumn = 7;
-					} else {
-						calendarElement.style.gridColumn = d.getDay();
+						continue;
 					}
+					calendarElement.style.gridColumn = d.getDay();
 				}
 				if (this.checkToday(d)) {
 					calendarElementLabel.style.color = "red";
@@ -80,9 +80,9 @@ export default {
 					document
 						.querySelector(".dayOfMonth")
 						.appendChild(calendarElement);
-				} else {
-					break;
+					continue;
 				}
+				break;
 			}
 		},
 		setLabel() {
@@ -123,50 +123,17 @@ export default {
 			this.$router.push({ name: "agendaview" });
 		},
 		dispEvent(ele, d) {
-			const eventDateStart = new Date(ele.start);
 			const eventDateEnd = new Date(ele.end);
-			if (
-				(eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth() &&
-					eventDateStart.getFullYear() == d.getFullYear()) ||
-				(ele.rrule == "WEEKLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					d.getDay() == eventDateStart.getDay()) ||
-				(ele.rrule == "DAILY" &&
-					eventDateStart.getTime() < d.getTime()) ||
-				(ele.rrule == "MONTHLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getDate() == d.getDate()) ||
-				(ele.rrule == "YEARLY" &&
-					eventDateStart.getTime() < d.getTime() &&
-					eventDateStart.getFullYear() < d.getFullYear() &&
-					eventDateStart.getDate() == d.getDate() &&
-					eventDateStart.getMonth() == d.getMonth())
-			) {
+			const eventDateStart = new Date(ele.start);
+			if (this.$isDate(ele, d)) {
 				const eventLabel = document.createElement("p");
-				const endHour =
-					eventDateEnd.getHours() != 0
-						? eventDateEnd.getHours()
-						: "0" + eventDateEnd.getHours();
-				const endMinutes =
-					`${eventDateEnd.getMinutes()}`.length == 2
-						? eventDateEnd.getMinutes()
-						: "0" + eventDateEnd.getMinutes();
-
-				const startHour =
-					eventDateStart.getHours() != 0
-						? eventDateStart.getHours()
-						: "0" + eventDateStart.getHours();
-				const startMinutes =
-					`${eventDateStart.getMinutes()}`.length == 2
-						? eventDateStart.getMinutes()
-						: "0" + eventDateStart.getMinutes();
-
+				const dates = this.$setDates(eventDateEnd, eventDateStart);
 				eventLabel.innerHTML = `${
-					startHour &&
-					startMinutes &&
-					(startHour != endHour || startMinutes != endMinutes)
-						? startHour + ":" + startMinutes
+					dates.startHour &&
+					dates.startMinutes &&
+					(dates.startHour != dates.endHour ||
+						dates.startMinutes != dates.endMinutes)
+						? dates.startHour + ":" + dates.startMinutes
 						: ""
 				} ${ele.summary}`;
 				eventLabel.classList.add("eventLabel");
