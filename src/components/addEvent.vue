@@ -43,9 +43,9 @@
         <option value="YEARLY">Every year</option>
       </select><br>
 	  <label for="every">Repeat every: </label>
-	  <input type="number" for="every" disabled><br>
-	  <label for="every">End after: </label>
-	  <input type="number" for="every" disabled>
+	  <input type="number" for="every" id="every" disabled><br>
+	  <label for="endAfter">End after: </label>
+	  <input type="number" for="endAfter" id="endAfter" disabled>
       <br />
     </form>
     <button @click="addEvent()">Add</button>
@@ -66,6 +66,9 @@ export default {
 			const selectCollection = document.getElementById("collection")
 				.value;
 			const selectFreq = document.getElementById("freq").value;
+			const count = document.getElementById("endAfter").value;
+			const interval = document.getElementById("every").value;
+			console.log(interval);
 			const event = {
 				allDay: inputs[1].checked,
 				start: [
@@ -88,6 +91,8 @@ export default {
 				status: selectStatus,
 				collection: selectCollection,
 				freq: selectFreq != "NONE" ? selectFreq : null,
+				interval,
+				count,
 			};
 			ipcRenderer.send("createEvent", event);
 			this.$store.state.events = [];
@@ -105,6 +110,18 @@ export default {
 				"#end"
 			).disabled;
 		},
+	},
+	mounted() {
+		const repeating = document.getElementById("freq");
+		repeating.addEventListener("change", () => {
+			if (repeating.value == "NONE") {
+				document.getElementById("endAfter").disabled = true;
+				document.getElementById("every").disabled = true;
+				return;
+			}
+			document.getElementById("endAfter").disabled = false;
+			document.getElementById("every").disabled = false;
+		});
 	},
 };
 </script>

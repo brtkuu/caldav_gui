@@ -36,8 +36,14 @@ async function createObject(calDirs, ele, file) {
 		);
 		const frequency = fileData.RRULE.split(/=|;/g);
 		data[Object.keys(data)[0]].rrule = frequency[1];
-		data[Object.keys(data)[0]].count = frequency[3];
-		data[Object.keys(data)[0]].interval = frequency[5];
+		if (frequency[2] == "COUNT") {
+			data[Object.keys(data)[0]].count = frequency[3];
+			data[Object.keys(data)[0]].interval = frequency[5];
+		}
+		if (frequency[2] == "INTERVAL") {
+			data[Object.keys(data)[0]].interval = frequency[3];
+			data[Object.keys(data)[0]].count = frequency[5];
+		}
 
 		// if (frequency[2] == "INTERVAL" || ) {
 		// 	Object.assign(data[Object.keys(data)[0]], {
