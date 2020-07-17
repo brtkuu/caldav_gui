@@ -21,6 +21,7 @@
 </template>
 <script>
 import Router from "vue-router";
+import currentWeekNumber from "current-week-number";
 
 export default {
 	name: "MonthView",
@@ -53,9 +54,9 @@ export default {
 				if (i == 1) {
 					if (!d.getDay()) {
 						calendarElement.style.gridColumn = 7;
-						continue;
+					} else {
+						calendarElement.style.gridColumn = d.getDay();
 					}
-					calendarElement.style.gridColumn = d.getDay();
 				}
 				if (this.checkToday(d)) {
 					calendarElementLabel.style.color = "red";
