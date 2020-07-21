@@ -98,29 +98,7 @@ try {
 					{
 						role: "paste",
 					},
-					...(isMac ? [{
-							role: "pasteAndMatchStyle",
-						},
-						{
-							role: "delete",
-						},
-						{
-							role: "selectAll",
-						},
-						{
-							type: "separator",
-						},
-						{
-							label: "Speech",
-							submenu: [{
-									role: "startspeaking",
-								},
-								{
-									role: "stopspeaking",
-								},
-							],
-						},
-					] : [{
+					[{
 							role: "delete",
 						},
 						{
@@ -129,7 +107,7 @@ try {
 						{
 							role: "selectAll",
 						},
-					]),
+					]
 				],
 			},
 		]);
