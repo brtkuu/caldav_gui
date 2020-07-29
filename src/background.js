@@ -217,13 +217,11 @@ try {
 		});
 
 		event.sender.send("got-data", events);
-		console.log("refresh");
 		event.sender.send("refreshview", "View Refreshed");
 		await syncCalendar(confPath);
 	});
 
 	ipcMain.on("deleteEvent", async (event, data) => {
-		console.log("delete");
 		await deleteEvent(calDirs, data);
 		event.sender.send("item-deleted", "deleted");
 		await syncCalendar(confPath);
