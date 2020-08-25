@@ -5,10 +5,10 @@ function saveConfigFile(configFile) {
 	return new Promise((resolve, reject) => {
 		fs.writeFile(
 			`${os.homedir()}/.config/sealcal/config.txt`,
-			configFile,
-			{ flag: "w" },
+			configFile, {
+				flag: "w"
+			},
 			(err) => {
-				console.log(configFile);
 				if (err) {
 					console.log(err);
 					throw err;

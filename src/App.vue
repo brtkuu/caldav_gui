@@ -9,7 +9,7 @@
       <button class="syncButton" @click="syncCalendar">Sync</button>
       <button class="todayButton" @click="today">Today</button>
     </header>
-    <router-view />
+    <router-view class="routerView" />
   </div>
 </template>
 <script>
@@ -69,10 +69,12 @@ export default {
 	font-family: "Nova Square", cursive;
 }
 header {
+	/* position: fixed; */
 	font-size: 30px;
 	background-color: RGB(82, 148, 161);
 	text-align: center;
 	color: white;
+	width: 100vw;
 }
 header a {
 	text-decoration: none;

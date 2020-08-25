@@ -7,6 +7,7 @@
     <p class="infoLabel">Status: {{event.status}}</p>
     <div @click="closeEventInfo" class="closeInfo"></div>
     <div :id="event.uid" @click="deleteEvent" class="deleteEvent">Delete</div>
+	<div @click="updateEvent" class="updateEvent">Edit</div>
   </div>
 </template>
 <script>
@@ -22,6 +23,7 @@ export default {
 			durationStart: undefined,
 			durationEnd: undefined,
 			duration: undefined,
+			updateEventFlag: false,
 		};
 	},
 	methods: {
@@ -61,6 +63,10 @@ export default {
 			ipcRenderer.once("item-deleted", (event, data) => {
 				ipcRenderer.send("get-data");
 			});
+		},
+		updateEvent() {
+			this.$store.commit("closeInfoEventView");
+			this.$store.commit("changeUpdateView");
 		},
 	},
 	mounted() {
@@ -126,5 +132,21 @@ export default {
 }
 .closeInfo:after {
 	transform: rotate(-45deg);
+}
+.updateEvent {
+	position: absolute;
+	top: 75%;
+	height: 30px;
+	width: 60px;
+	background-color: green;
+	border: 2px solid;
+	border-radius: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	text-align: center;
+	line-height: 30px;
+}
+.updateEvent:hover {
+	cursor: pointer;
 }
 </style>

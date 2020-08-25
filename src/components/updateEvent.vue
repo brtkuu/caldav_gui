@@ -1,33 +1,33 @@
 <template>
-  <div class="container">
+<div class="container">
     <form action>
-      <label for="title">Title:</label>
-      <input type="text" name="title" id="title" />
+      <label for="title" >Title:</label>
+      <input type="text" name="title" id="title" :value="event.summary"/>
       <br />
       <label for="allday">All day event:</label>
-      <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent" checked />
+      <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent"  />
       <br />
       <label for="start">Start hour:</label>
-      <input type="time" name="start" id="start" disabled/>
+      <input type="time" name="start" id="start" v-bind:value="startHour"/>
       <label for="end">End hour:</label>
-      <input type="time" name="end" id="end" disabled />
+      <input type="time" name="end" id="end" v-bind:value="endHour" />
       <label for="description">
         Description:
         <br />
       </label>
-      <textarea name="description" id="description" cols="70" rows="5"></textarea>
+      <textarea name="description" id="description" cols="70" rows="5" :value="event.description"></textarea>
       <label for="location">Location:</label>
-      <input type="text" name="location" id="location" />
+      <input type="text" name="location" id="location" :value="event.location"/>
       <br />
       <label for="status">Status:</label>
-      <select name="status" id="status">
+      <select name="status" id="status" :value="event.status">
         <option value="CONFIRMED">Confirmed</option>
         <option value="TENTATIVE">Tentative</option>
         <option value="CANCELLED">Cancelled</option>
       </select>
       <br />
       <label for="collection">Collection:</label>
-      <select name="collection" id="collection">
+      <select name="collection" id="collection" :value="event.collection">
         <option
           v-for="(collection, index) in this.$store.state.collections"
           :key="index"
@@ -35,7 +35,7 @@
       </select>
       <br />
       <label for="repeat">Repeating:</label>
-      <select name="repeat" id="freq">
+      <select name="repeat" id="freq" :value="event.rrule">
         <option value="NONE">None</option>
         <option value="DAILY">Every day</option>
         <option value="WEEKLY">Every week</option>
@@ -44,23 +44,51 @@
       </select>
       <br />
       <label for="every">Repeat every:</label>
-      <input type="number" for="every" id="every" min="1" disabled/>
+      <input type="number" for="every" id="every" :value="event.interval"/>
       <br />
       <label for="endAfter">End after:</label>
-      <input type="number" for="endAfter" min="1" id="endAfter" disabled />
+      <input type="number" for="endAfter" id="endAfter" :value="event.count" />
       <br />
     </form>
-    <button @click="addEvent()">Add</button>
-    <div @click="closeAddView" class="close"></div>
+    <div @click="closeUpdateView" class="close"></div>
+    <div @click="updateEvent">Update</div>
   </div>
 </template>
 <script>
 import { ipcRenderer } from "electron";
 
 export default {
-	name: "AddEvent",
+	name: "UpdateEvent",
+	props: ["event"],
+	data() {
+		return {
+			startHour: `${new Date(this.event.start).getHours()}:${
+				new Date(this.event.start).getMinutes() <= 0
+					? "0" + new Date(this.event.start).getMinutes()
+					: new Date(this.event.start).getMinutes()
+			}`,
+			endHour: `${new Date(this.event.end).getHours()}:${
+				new Date(this.event.end).getMinutes() <= 0
+					? "0" + new Date(this.event.end).getMinutes()
+					: new Date(this.event.end).getMinutes()
+			}`,
+			startDate: new Date(this.event.start),
+			endDate: new Date(this.event.end),
+		};
+	},
 	methods: {
-		addEvent() {
+		closeUpdateView() {
+			this.$store.commit("changeUpdateView");
+		},
+		allDayEvent() {
+			document.querySelector("#start").disabled = !document.querySelector(
+				"#start"
+			).disabled;
+			document.querySelector("#end").disabled = !document.querySelector(
+				"#end"
+			).disabled;
+		},
+		updateEvent() {
 			const inputs = document.querySelectorAll("input");
 			const startHour = inputs[2].value.split(":");
 			const endHour = inputs[3].value.split(":");
@@ -70,19 +98,19 @@ export default {
 			const selectFreq = document.getElementById("freq").value;
 			const count = document.getElementById("endAfter").value;
 			const interval = document.getElementById("every").value;
-			const event = {
+			const updatedEvent = {
 				allDay: inputs[1].checked,
 				start: [
-					this.$store.state.currentYear,
-					this.$store.state.currentMonth + 1,
-					this.$store.state.clickedDate * 1,
+					this.startDate.getFullYear(),
+					this.startDate.getMonth() + 1,
+					this.startDate.getDate(),
 					startHour[0] * 1,
 					startHour[1] * 1,
 				],
 				end: [
-					this.$store.state.currentYear,
-					this.$store.state.currentMonth + 1,
-					this.$store.state.clickedDate * 1,
+					this.endDate.getFullYear(),
+					this.endDate.getMonth() + 1,
+					this.endDate.getDate(),
 					endHour[0] * 1,
 					endHour[1] * 1,
 				],
@@ -94,46 +122,32 @@ export default {
 				freq: selectFreq != "NONE" ? selectFreq : null,
 				interval,
 				count,
+				uid: this.event.uid,
 			};
-			ipcRenderer.send("createEvent", event);
+			this.$store.commit("changeUpdateView");
+			ipcRenderer.send("update-event", updatedEvent);
 			this.$store.state.events = [];
 			this.$store.commit("updateEvents");
 			ipcRenderer.send("syncCalendar", event);
 		},
-		closeAddView() {
-			this.$store.commit("closeAddEventView");
-		},
-		allDayEvent() {
-			document.querySelector("#start").disabled = !document.querySelector(
-				"#start"
-			).disabled;
-			document.querySelector("#end").disabled = !document.querySelector(
-				"#end"
-			).disabled;
-		},
 	},
 	mounted() {
-		const repeating = document.getElementById("freq");
-		repeating.addEventListener("change", () => {
-			if (repeating.value == "NONE") {
-				document.getElementById("endAfter").disabled = true;
-				document.getElementById("every").disabled = true;
-				return;
-			}
-			document.getElementById("endAfter").disabled = false;
-			document.getElementById("every").disabled = false;
-		});
+		if (this.startHour == this.endHour) {
+			document.querySelector("#alldayyes").checked = true;
+			document.querySelector("#start").disabled = true;
+			document.querySelector("#end").disabled = true;
+		}
 	},
 };
 </script>
-<style scoped>
+<style lang="css" scoped>
 .container {
-	position: fixed;
-	top: 50%;
+	position: absolute;
 	width: 420px;
 	height: 500px;
 	border: 1px solid;
 	background-color: #fff;
+    z-index: 10;
 }
 input {
 	font-size: 20px;

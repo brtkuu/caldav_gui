@@ -10,12 +10,16 @@
 	<add-event v-if="this.$store.state.modals.addEventModal" class="addEvent"></add-event>
 	<event-info class="eventInfo" v-if="this.$store.state.modals.eventInfoModal" v-bind:event='clickedEvent'></event-info>
 	</transition>
+	<transition name="fade" mode="out-in" :duration="350">
+	<update-event class="updateEvent" v-if="this.$store.state.modals.updateEventModal"  v-bind:event='clickedEvent'></update-event>
+	</transition>
   </div>
 </template>
 <script>
 import AddEvent from "../components/addEvent";
 import EventModal from "../components/eventModal";
 import DateDisplay from "../components/dateDisplay";
+import UpdateEvent from "../components/updateEvent";
 
 export default {
 	name: "AgendaView",
@@ -23,6 +27,7 @@ export default {
 		"add-event": AddEvent,
 		"event-info": EventModal,
 		"date-display": DateDisplay,
+		"update-event": UpdateEvent,
 	},
 	data() {
 		return {
@@ -133,6 +138,13 @@ export default {
 	cursor: pointer;
 }
 .eventInfo {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
+}
+.updateEvent {
 	position: absolute;
 	left: 50%;
 	top: 50%;

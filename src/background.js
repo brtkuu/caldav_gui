@@ -236,6 +236,9 @@ try {
 		await createConfig(data);
 		event.sender.send("config-created", "Config correct");
 	});
+	ipcMain.on("update-event", (event, data) => {
+		createEvent(data, calDirs, data.uid);
+	})
 } catch (err) {
 	console.log(err);
 }

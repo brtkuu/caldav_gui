@@ -26,6 +26,7 @@ async function getData(calDirs) {
 }
 async function createObject(calDirs, ele, file) {
 	let data = ical.parseFile(`${calDirs.path}/${ele}/${file}`);
+	data[Object.keys(data)[0]].collection = ele;
 	if (data[Object.keys(data)[0]].rrule) {
 		let res = await readfile(`${calDirs.path}/${ele}/${file}`, {
 			encoding: "utf-8",
@@ -37,24 +38,23 @@ async function createObject(calDirs, ele, file) {
 		const frequency = fileData.RRULE.split(/=|;/g);
 		data[Object.keys(data)[0]].rrule = frequency[1];
 		if (frequency[2] == "COUNT") {
-			data[Object.keys(data)[0]].count = frequency[3]
-				? frequency[3] * 1
-				: 1;
-			data[Object.keys(data)[0]].interval = frequency[5]
-				? frequency[5] * 1
-				: 1;
+			data[Object.keys(data)[0]].count = frequency[3] ?
+				frequency[3] * 1 :
+				1;
+			data[Object.keys(data)[0]].interval = frequency[5] ?
+				frequency[5] * 1 :
+				1;
 		}
 		if (frequency[2] == "INTERVAL") {
-			data[Object.keys(data)[0]].interval = frequency[3]
-				? frequency[3] * 1
-				: 1;
-			data[Object.keys(data)[0]].count = frequency[5]
-				? frequency[5] * 1
-				: 1;
+			data[Object.keys(data)[0]].interval = frequency[3] ?
+				frequency[3] * 1 :
+				1;
+			data[Object.keys(data)[0]].count = frequency[5] ?
+				frequency[5] * 1 :
+				1;
 		}
 	}
 	return new Promise((resolve, rejects) => {
-		console.log(data[Object.keys(data)[0]]);
 		resolve(data[Object.keys(data)[0]]);
 	});
 }

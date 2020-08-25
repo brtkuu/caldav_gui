@@ -155,7 +155,6 @@ export default {
 		},
 	},
 	mounted() {
-		console.log(this.$store.state.events);
 		document.querySelector(".dayOfMonth").innerHTML = "";
 		(this.months = [
 			"January",
