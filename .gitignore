@@ -3,3 +3,4 @@ dist_electron
 dist
 #Electron-builder output
 /dist_electron
+.DS_store
