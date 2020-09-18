@@ -1,6 +1,5 @@
 const fs = require("fs");
 const util = require("util");
-const os = require("os");
 
 const ical = require("ical");
 
@@ -14,8 +13,7 @@ async function getData(calDirs) {
 	const events = [];
 	for (const ele of calDirs.collections) {
 		const names = await readdir(`${calDirs.path}/${ele}`);
-		if (names === undefined) {
-			console.log("undefined");
+		if (!names) {
 			return;
 		}
 		for (const file of names) {

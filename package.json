@@ -7,9 +7,10 @@
 		"build": "vue-cli-service build",
 		"build:electron": "vue-cli-service build:electron",
 		"electron:build": "vue-cli-service electron:build",
-		"start": "vue-cli-service electron:serve"
+		"start": "vue-cli-service electron:serve",
+		"buildapp": "electron-packager . SealCal"
 	},
-	"main": "./src/background.js",
+	"main": "background.js",
 	"dependencies": {
 		"current-week-number": "^1.0.7",
 		"fibers": "^5.0.0",
@@ -29,6 +30,8 @@
 		"@vue/cli-plugin-babel": "^3.0.3",
 		"@vue/cli-service": "^3.0.3",
 		"electron": "^2.0.2",
+		"electron-builder": "^22.8.0",
+		"electron-packager": "^15.1.0",
 		"vue-cli-plugin-electron-builder": "~1.4.6",
 		"vue-template-compiler": "^2.5.17"
 	}

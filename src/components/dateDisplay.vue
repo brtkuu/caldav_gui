@@ -5,7 +5,7 @@
       <button class="agendaNavBtn" @click="nextDay">NEXT</button>
     </div>
     <p class="agendaHeader">
-      {{ this.$store.state.clickedDate != undefined
+      {{ this.$store.state.clickedDate
       ? this.$store.state.clickedDate
       : this.$store.state.currentDate.getDate() }}
       {{ this.$store.state.months[this.$store.state.currentMonth] }} {{ this.$store.state.currentYear }}
@@ -17,14 +17,14 @@ export default {
 	name: "DateDisplay",
 	methods: {
 		nextDay() {
-			if (this.$store.state.clickedDate == undefined) {
+			if (this.$store.state.clickedDate) {
 				this.$store.state.clickedDate = this.$store.state.today.getDate();
 			}
 			this.$store.commit("incrementClkDay");
 			this.$emit("show");
 		},
 		previewDay() {
-			if (this.$store.state.clickedDate == undefined) {
+			if (this.$store.state.clickedDate) {
 				this.$store.state.clickedDate = this.$store.state.currentDate.getDate();
 			}
 			this.$store.commit("decrementClkDay");

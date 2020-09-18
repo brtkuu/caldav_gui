@@ -2,9 +2,9 @@
   <div id="app">
     <header>
       <router-link to="/month" exact>Month</router-link>
-      <span>&nbsp;|&nbsp;</span>
+      <span class="space">|</span>
       <router-link to="/agenda" exact>Agenda</router-link>
-      <span>&nbsp;|&nbsp;</span>
+      <span class="space">|</span>
       <router-link to="/day" exact>Day</router-link>
       <button class="syncButton" @click="syncCalendar">Sync</button>
       <button class="todayButton" @click="today">Today</button>
@@ -34,44 +34,50 @@ export default {
 	},
 	mounted() {
 		ipcRenderer.send("calendar-start");
-		ipcRenderer.on("got-data", (event, data) => {
+
+		ipcRenderer.on("got-data", (_event, data) => {
 			this.$store.state.events = data;
 		});
-		ipcRenderer.on("config-created", (event, data) => {
+
+		ipcRenderer.on("config-created", () => {
 			ipcRenderer.send("calendar-start");
 		});
-		ipcRenderer.on("config-error", (event, data) => {
+
+		ipcRenderer.on("config-error", () => {
 			this.$router.push({ name: "loginview" });
 		});
-		ipcRenderer.on("set-correct", (event, data) => {
+
+		ipcRenderer.on("set-correct", () => {
 			ipcRenderer.send("calendar-start");
 			this.$store.commit("updateEvents");
 		});
-		ipcRenderer.on("config-correct", (event, data) => {
+
+		ipcRenderer.on("config-correct", (_event, data) => {
 			this.$store.commit("updateEvents");
 			this.$store.state.collections = data;
 			this.$router.push({ name: "monthview" });
 		});
-		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
-		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
-		ipcRenderer.on("refreshview", (event, data) => {
-			this.$store.commit("closeAddEventView");
-			this.$store.commit("closeInfoEventView");
+
+		ipcRenderer.on("refreshview", () => {
+			this.$store.commit("toggleAddEventView");
+			this.$store.commit("toggleInfoEventView");
 			const location = this.$route.fullPath;
 			this.$router.replace("/");
 			this.$nextTick(() => this.$router.replace(location));
 		});
+
+		this.$store.state.currentMonth = this.$store.state.currentDate.getMonth();
+		this.$store.state.currentYear = this.$store.state.currentDate.getFullYear();
 	},
 };
 </script>
-<style >
+<style>
 * {
 	font-family: "Nova Square", cursive;
 }
 header {
-	/* position: fixed; */
 	font-size: 30px;
-	background-color: RGB(82, 148, 161);
+	background-color: rgb(82, 148, 161);
 	text-align: center;
 	color: white;
 	width: 100vw;
@@ -102,5 +108,8 @@ header a {
 	left: 0%;
 	transform: translateX(5%);
 	color: white;
+}
+.space {
+	margin: 0 5px 0 5px;
 }
 </style>

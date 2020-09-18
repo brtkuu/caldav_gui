@@ -1,31 +1,35 @@
 <template>
 <div class="container">
     <form action>
+	  <div class="label">
       <label for="title" >Title:</label>
       <input type="text" name="title" id="title" :value="event.summary"/>
-      <br />
+      </div>
+	  <div class="label">
       <label for="allday">All day event:</label>
       <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent"  />
-      <br />
+      </div>
+	  <div class="label">
       <label for="start">Start hour:</label>
       <input type="time" name="start" id="start" v-bind:value="startHour"/>
       <label for="end">End hour:</label>
       <input type="time" name="end" id="end" v-bind:value="endHour" />
       <label for="description">
         Description:
-        <br />
       </label>
       <textarea name="description" id="description" cols="70" rows="5" :value="event.description"></textarea>
       <label for="location">Location:</label>
       <input type="text" name="location" id="location" :value="event.location"/>
-      <br />
+      </div>
+	  <div class="label">
       <label for="status">Status:</label>
       <select name="status" id="status" :value="event.status">
         <option value="CONFIRMED">Confirmed</option>
         <option value="TENTATIVE">Tentative</option>
         <option value="CANCELLED">Cancelled</option>
       </select>
-      <br />
+      </div>
+	  <div class="label">
       <label for="collection">Collection:</label>
       <select name="collection" id="collection" :value="event.collection">
         <option
@@ -33,7 +37,8 @@
           :key="index"
         >{{ collection }}</option>
       </select>
-      <br />
+      </div>
+	  <div class="label">
       <label for="repeat">Repeating:</label>
       <select name="repeat" id="freq" :value="event.rrule">
         <option value="NONE">None</option>
@@ -42,13 +47,15 @@
         <option value="MONTHLY">Every month</option>
         <option value="YEARLY">Every year</option>
       </select>
-      <br />
+      </div>
+	  <div class="label">
       <label for="every">Repeat every:</label>
       <input type="number" for="every" id="every" :value="event.interval"/>
-      <br />
+      </div>
+	  <div class="label">
       <label for="endAfter">End after:</label>
       <input type="number" for="endAfter" id="endAfter" :value="event.count" />
-      <br />
+      </div>
     </form>
     <div @click="closeUpdateView" class="close"></div>
     <div @click="updateEvent">Update</div>

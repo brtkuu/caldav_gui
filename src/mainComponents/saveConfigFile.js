@@ -10,7 +10,6 @@ function saveConfigFile(configFile) {
 			},
 			(err) => {
 				if (err) {
-					console.log(err);
 					throw err;
 				}
 				resolve(configFile);

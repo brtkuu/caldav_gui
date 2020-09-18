@@ -155,24 +155,9 @@ export default {
 		},
 	},
 	mounted() {
-		document.querySelector(".dayOfMonth").innerHTML = "";
-		(this.months = [
-			"January",
-			"February",
-			"March",
-			"April",
-			"May",
-			"June",
-			"July",
-			"August",
-			"September",
-			"October",
-			"November",
-			"December",
-		]),
-			this.setLabel();
+		document.querySelector(".dayOfMonth").textContent = "";
+		(this.months = this.$store.state.months), this.setLabel();
 		this.createTable();
-		this.$store.commit("closeAddEventView");
 	},
 };
 </script>
@@ -198,8 +183,8 @@ export default {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  border-top: 1px solid white;
-  border-left: 1px solid white;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
 }
 
 .month {
@@ -214,7 +199,7 @@ export default {
   grid-gap: 5px;
   line-height: 30px;
   text-align: center;
-  background-color: RGB(139, 186, 196);
+  background-color: rgb(139, 186, 196);
   color: rgb(219, 219, 219);
 }
 

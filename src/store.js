@@ -2,9 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 var fs = require("fs");
 
-import {
-	ipcRenderer
-} from "electron";
+import { ipcRenderer } from "electron";
 
 Vue.use(Vuex);
 
@@ -101,24 +99,17 @@ export default new Vuex.Store({
 						state.currentMonth,
 						32
 					).getDate();
-				state.clickedMonth != undefined ?
-					state.clickedMonth--
-					:
-					(state.clickedMonth = state.currentMonth);
+				state.clickedMonth
+					? state.clickedMonth--
+					: (state.clickedMonth = state.currentMonth);
 				state.currentDate++;
 			}
 		},
-		openAddEventView(state) {
-			state.modals.addEventModal = true;
+		toggleAddEventView(state) {
+			state.modals.addEventModal = !state.modals.addEventModal;
 		},
-		closeAddEventView(state) {
-			state.modals.addEventModal = false;
-		},
-		openInfoEventView(state) {
-			state.modals.eventInfoModal = true;
-		},
-		closeInfoEventView(state) {
-			state.modals.eventInfoModal = false;
+		toggleInfoEventView(state) {
+			state.modals.eventInfoModal = !state.modals.eventInfoModal;
 		},
 		updateEvents(state) {
 			state.events = [];
@@ -126,7 +117,7 @@ export default new Vuex.Store({
 		},
 		changeUpdateView(state) {
 			state.modals.updateEventModal = !state.modals.updateEventModal;
-		}
+		},
 	},
 	actions: {},
 	getters: {},

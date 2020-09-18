@@ -52,15 +52,15 @@ try {
 		secure: true,
 	});
 
-	const isMac = process.platform === "darwin";
+	const windowParams = {
+		width: 1000,
+		height: 700,
+		minWidth: 800,
+		minHeight: 600,
+	};
 
 	function createMainWindow() {
-		const window = new BrowserWindow({
-			width: 1000,
-			height: 700,
-			minWidth: 800,
-			minHeight: 600,
-		});
+		const window = new BrowserWindow(windowParams);
 
 		const menu = Menu.buildFromTemplate([{
 				label: "SealCal",
@@ -107,7 +107,7 @@ try {
 						{
 							role: "selectAll",
 						},
-					]
+					],
 				],
 			},
 		]);
@@ -168,13 +168,13 @@ try {
 		mainWindow = createMainWindow();
 	});
 	//Response on ipcRenderer.send
-	ipcMain.on("syncCalendar", async (event, data) => {
+	ipcMain.on("syncCalendar", async (event) => {
 		await syncCalendar(confPath);
 		event.sender.send("refreshview");
 	});
 	//Render process communication with main process
 
-	ipcMain.on("calendar-start", async (event, data) => {
+	ipcMain.on("calendar-start", async (event) => {
 		const exists = await pathExists(
 			`${os.homedir()}/.config/sealcal/config.txt`
 		);
@@ -182,9 +182,11 @@ try {
 			event.sender.send("config-error", "No config file");
 			return;
 		}
-		const conf = await readfile(`${os.homedir()}/.config/sealcal/config.txt`, {
-			encoding: "utf-8",
-		});
+		const conf = await readfile(
+			`${os.homedir()}/.config/sealcal/config.txt`, {
+				encoding: "utf-8",
+			}
+		);
 		confPath = conf;
 		await syncCalendar(confPath);
 		const res = await readfile(confPath, "utf-8");
@@ -203,12 +205,12 @@ try {
 		event.sender.send("refreshview");
 	});
 
-	ipcMain.on("createEvent", (event, data) => {
+	ipcMain.on("createEvent", (_event, data) => {
 		const ID = uid(16).toUpperCase();
 		createEvent(data, calDirs, ID);
 	});
 
-	ipcMain.on("get-data", async (event, data) => {
+	ipcMain.on("get-data", async (event) => {
 		const events = await getData(calDirs);
 		events.sort(function (a, b) {
 			a = new Date(a.start);
@@ -236,9 +238,9 @@ try {
 		await createConfig(data);
 		event.sender.send("config-created", "Config correct");
 	});
-	ipcMain.on("update-event", (event, data) => {
+	ipcMain.on("update-event", (_event, data) => {
 		createEvent(data, calDirs, data.uid);
-	})
+	});
 } catch (err) {
 	console.log(err);
 }

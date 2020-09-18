@@ -2,7 +2,7 @@
 	<div class="agendaContainer">
 		<date-display v-on:show="displayEvents()"></date-display>
 	<div class="agendaBody">
-		<ul @click="clickEvent" class="eventsList">
+		<ul @click="clickEvent" ref="eventList" class="eventsList">
 		</ul>
 	</div>
     <button class="addEventBtn" @click="openAddView">Add Event</button>
@@ -36,7 +36,7 @@ export default {
 	},
 	methods: {
 		displayEvents() {
-			document.querySelector(".eventsList").innerHTML = "";
+			this.$refs.eventList.textContent = "";
 			const d = new Date(
 				`${this.$store.state.currentYear} ${this.$store.state
 					.currentMonth + 1}, ${this.$store.state.clickedDate}`
@@ -45,12 +45,12 @@ export default {
 				const event = this.createEvent(ele, d);
 				if (event) {
 					event.id = index;
-					document.querySelector(".eventsList").appendChild(event);
+					this.$refs.eventList.appendChild(event);
 				}
 			});
 		},
 		openAddView() {
-			this.$store.commit("openAddEventView");
+			this.$store.commit("toggleAddEventView");
 		},
 		createEvent(ele, d) {
 			const eventDateStart = new Date(ele.start);
@@ -74,7 +74,7 @@ export default {
 		},
 		clickEvent() {
 			this.clickedEvent = this.$store.state.events[event.target.id];
-			this.$store.commit("openInfoEventView");
+			this.$store.commit("toggleInfoEventView");
 		},
 	},
 	mounted() {

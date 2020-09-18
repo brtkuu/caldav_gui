@@ -28,7 +28,7 @@ export default {
 	},
 	methods: {
 		closeEventInfo() {
-			this.$store.commit("closeInfoEventView");
+			this.$store.commit("toggleInfoEventView");
 		},
 		createDates() {
 			this.startDate = new Date(this.event.start);
@@ -65,7 +65,7 @@ export default {
 			});
 		},
 		updateEvent() {
-			this.$store.commit("closeInfoEventView");
+			this.$store.commit("toggleInfoEventView");
 			this.$store.commit("changeUpdateView");
 		},
 	},

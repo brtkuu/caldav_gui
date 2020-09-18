@@ -1,31 +1,35 @@
 <template>
   <div class="container">
-    <form action>
+    <form>
+	<div class="label">
       <label for="title">Title:</label>
-      <input type="text" name="title" id="title" />
-      <br />
+      <input ref="title" type="text" name="title" id="title" />
+	  </div>
+	  <div class="label">
       <label for="allday">All day event:</label>
       <input type="checkbox" name="allday" id="alldayyes" @click="allDayEvent" checked />
-      <br />
+      </div>
+	  <div class="label">
       <label for="start">Start hour:</label>
       <input type="time" name="start" id="start" disabled/>
       <label for="end">End hour:</label>
       <input type="time" name="end" id="end" disabled />
       <label for="description">
         Description:
-        <br />
       </label>
       <textarea name="description" id="description" cols="70" rows="5"></textarea>
       <label for="location">Location:</label>
       <input type="text" name="location" id="location" />
-      <br />
+      </div>
+	  <div class="label">
       <label for="status">Status:</label>
       <select name="status" id="status">
         <option value="CONFIRMED">Confirmed</option>
         <option value="TENTATIVE">Tentative</option>
         <option value="CANCELLED">Cancelled</option>
       </select>
-      <br />
+      </div>
+	  <div class="label">
       <label for="collection">Collection:</label>
       <select name="collection" id="collection">
         <option
@@ -33,7 +37,8 @@
           :key="index"
         >{{ collection }}</option>
       </select>
-      <br />
+      </div>
+	  <div class="label">
       <label for="repeat">Repeating:</label>
       <select name="repeat" id="freq">
         <option value="NONE">None</option>
@@ -42,13 +47,16 @@
         <option value="MONTHLY">Every month</option>
         <option value="YEARLY">Every year</option>
       </select>
-      <br />
+      </div>
+	  <div class="label">
       <label for="every">Repeat every:</label>
       <input type="number" for="every" id="every" min="1" disabled/>
-      <br />
+     </div>
+	  <div class="label">
       <label for="endAfter">End after:</label>
       <input type="number" for="endAfter" min="1" id="endAfter" disabled />
-      <br />
+      </div>
+	  
     </form>
     <button @click="addEvent()">Add</button>
     <div @click="closeAddView" class="close"></div>
@@ -101,7 +109,7 @@ export default {
 			ipcRenderer.send("syncCalendar", event);
 		},
 		closeAddView() {
-			this.$store.commit("closeAddEventView");
+			this.$store.commit("toggleAddEventView");
 		},
 		allDayEvent() {
 			document.querySelector("#start").disabled = !document.querySelector(
@@ -113,6 +121,7 @@ export default {
 		},
 	},
 	mounted() {
+		this.$refs.title.focus();
 		const repeating = document.getElementById("freq");
 		repeating.addEventListener("change", () => {
 			if (repeating.value == "NONE") {
@@ -182,5 +191,10 @@ select {
 }
 .close:after {
 	transform: rotate(-45deg);
+}
+.label {
+	width: 100%;
+	text-align: center;
+	margin-bottom: 4px;
 }
 </style>

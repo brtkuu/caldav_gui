@@ -34,15 +34,16 @@ export default {
 	},
 	methods: {
 		writeHours() {
-			for (let i = -1; i < 25; i++) {
+			const hoursRows = 25; // number of hours + one for all_day_events
+			for (let i = -1; i < hoursRows; i++) {
 				const hourLabelFull = document.createElement("p");
 				const hoursTable = document.querySelector(".hoursTable");
 				hourLabelFull.classList.add("hourLabel");
 				if (i == -1) {
-					hourLabelFull.innerHTML = `All Day`;
+					hourLabelFull.textContent = `All Day`;
 					hourLabelFull.classList.add("alldayHour");
 				} else {
-					hourLabelFull.innerHTML = `${i}:00`;
+					hourLabelFull.textContent = `${i}:00`;
 					hourLabelFull.style.gridColumn = "1/2";
 				}
 				hoursTable.appendChild(hourLabelFull);
@@ -77,7 +78,7 @@ export default {
 						".eventDayLabel"
 					);
 
-					offSetsArr.forEach((ele, index) => {
+					offSetsArr.forEach((ele) => {
 						if (
 							topOffset >= ele.offsetTop &&
 							topOffset <= ele.offsetTop + ele.clientHeight
@@ -127,11 +128,11 @@ export default {
 		clickEvent() {
 			if (event.target.id) {
 				this.clickedEvent = this.$store.state.events[event.target.id];
-				this.$store.commit("openInfoEventView");
+				this.$store.commit("toggleInfoEventView");
 			}
 		},
 		openAddView() {
-			this.$store.commit("openAddEventView");
+			this.$store.commit("toggleAddEventView");
 		},
 	},
 	mounted() {
