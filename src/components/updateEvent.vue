@@ -177,6 +177,7 @@ select {
 	margin-right: auto;
 	overflow: scroll;
 	resize: none;
+	width: 90%;
 }
 .close {
 	position: absolute;

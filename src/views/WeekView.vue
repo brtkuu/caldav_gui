@@ -23,6 +23,7 @@
             v-if="this.$store.state.modals.eventInfoModal && clickedEvent"
             v-bind:event="clickedEvent"
         ></event-info>
+        <update-event class="updateEvent" v-if="this.$store.state.modals.updateEventModal"  v-bind:event='clickedEvent'></update-event>
     </div>
 
 </template>
@@ -30,6 +31,7 @@
     import WeekDisplay from "../components/weekDisplay";
     import AddEvent from "../components/addEvent";
     import EventModal from "../components/eventModal";
+    import UpdateEvent from "../components/updateEvent";
 
     export default {
         name: "WeekView",
@@ -37,6 +39,7 @@
             "week-display": WeekDisplay,
             "add-event": AddEvent,
             "event-info": EventModal,
+            "update-event": UpdateEvent,
         },
         data() {
 		    return {
