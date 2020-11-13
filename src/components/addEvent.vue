@@ -58,7 +58,7 @@
       </div>
 	  
     </form>
-    <button @click="addEvent()">Add</button>
+    <button @click="addEvent()">ADD</button>
     <div @click="closeAddView" class="close"></div>
   </div>
 </template>
@@ -105,8 +105,9 @@ export default {
 			};
 			ipcRenderer.send("createEvent", event);
 			this.$store.state.events = [];
+
 			this.$store.commit("updateEvents");
-			ipcRenderer.send("syncCalendar", event);
+			this.$store.state.modals.eventInfoModal = false;
 		},
 		closeAddView() {
 			this.$store.commit("toggleAddEventView");
@@ -145,22 +146,23 @@ export default {
 	background-color: #fff;
 }
 input {
-	font-size: 20px;
+	font-size: 18px;
 }
 label {
 	line-height: 30px;
 }
 form {
-	font-size: 20px;
+	font-size: 18px;
 	margin: 35px 5px 10px 10px;
 }
 select {
-	font-size: 20px;
+	font-size: 18px;
 }
 #title {
-	width: 250px;
+	width: 200px;
 }
 #description {
+	width: 90%;
 	margin-left: auto;
 	margin-right: auto;
 	overflow: scroll;
@@ -196,5 +198,12 @@ select {
 	width: 100%;
 	text-align: center;
 	margin-bottom: 4px;
+}
+.addBtn{
+	position: relative;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 20px;
+
 }
 </style>

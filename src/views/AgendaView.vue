@@ -8,10 +8,10 @@
     <button class="addEventBtn" @click="openAddView">Add Event</button>
 	<transition name="fade" mode="out-in" :duration="350">
 	<add-event v-if="this.$store.state.modals.addEventModal" class="addEvent"></add-event>
-	<event-info class="eventInfo" v-if="this.$store.state.modals.eventInfoModal" v-bind:event='clickedEvent'></event-info>
+	<event-info class="eventInfo" v-if="this.$store.state.modals.eventInfoModal && clickedEvent" v-bind:event='clickedEvent'></event-info>
 	</transition>
 	<transition name="fade" mode="out-in" :duration="350">
-	<update-event class="updateEvent" v-if="this.$store.state.modals.updateEventModal"  v-bind:event='clickedEvent'></update-event>
+	<update-event class="updateEvent" v-if="this.$store.state.modals.updateEventModal && clickedEvent"  v-bind:event='clickedEvent'></update-event>
 	</transition>
   </div>
 </template>

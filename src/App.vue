@@ -6,6 +6,8 @@
       <router-link to="/agenda" exact>Agenda</router-link>
       <span class="space">|</span>
       <router-link to="/day" exact>Day</router-link>
+	  <span class="space">|</span>
+      <router-link to="/week" exact>Week</router-link>
       <button class="syncButton" @click="syncCalendar">Sync</button>
       <button class="todayButton" @click="today">Today</button>
     </header>
@@ -17,7 +19,7 @@ import { ipcRenderer } from "electron";
 
 export default {
 	name: "App",
-
+	
 	methods: {
 		syncCalendar() {
 			ipcRenderer.send("syncCalendar");
@@ -59,8 +61,8 @@ export default {
 		});
 
 		ipcRenderer.on("refreshview", () => {
-			this.$store.commit("toggleAddEventView");
-			this.$store.commit("toggleInfoEventView");
+			this.$store.state.modals.eventInfoModal = false;
+			this.$store.state.modals.addEventModal = false;
 			const location = this.$route.fullPath;
 			this.$router.replace("/");
 			this.$nextTick(() => this.$router.replace(location));
@@ -73,10 +75,10 @@ export default {
 </script>
 <style>
 * {
-	font-family: "Nova Square", cursive;
+	font-family: "sans-serif", cursive;
 }
 header {
-	font-size: 30px;
+	font-size: 24px;
 	background-color: rgb(82, 148, 161);
 	text-align: center;
 	color: white;
@@ -93,7 +95,7 @@ header a {
 	position: absolute;
 	left: 100%;
 	transform: translateX(-105%);
-	font-size: 30px;
+	font-size: 22px;
 	background-color: transparent;
 	border: none;
 	cursor: pointer;
@@ -101,7 +103,7 @@ header a {
 }
 .todayButton {
 	position: absolute;
-	font-size: 30px;
+	font-size: 22px;
 	background-color: transparent;
 	border: none;
 	cursor: pointer;

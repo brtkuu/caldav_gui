@@ -17,14 +17,14 @@ export default {
 	name: "DateDisplay",
 	methods: {
 		nextDay() {
-			if (this.$store.state.clickedDate) {
-				this.$store.state.clickedDate = this.$store.state.today.getDate();
+			if (!this.$store.state.clickedDate) {
+				this.$store.state.clickedDate = new Date().getDate();
 			}
 			this.$store.commit("incrementClkDay");
 			this.$emit("show");
 		},
 		previewDay() {
-			if (this.$store.state.clickedDate) {
+			if (!this.$store.state.clickedDate) {
 				this.$store.state.clickedDate = this.$store.state.currentDate.getDate();
 			}
 			this.$store.commit("decrementClkDay");
@@ -36,5 +36,8 @@ export default {
 <style scoped>
 .dateDisplayContainer {
 	background-color: white;
+}
+.agendaHeader{
+	font-size: 20px;
 }
 </style>

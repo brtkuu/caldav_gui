@@ -2,13 +2,13 @@
   <div class="dayContainer">
     <date-display class="dateDisplay"></date-display>
     <div class="hoursTable">
-      <div @click="clickEvent" @dblclick="openAddView" class="hourDiv"></div>
+      <div @dblclick="openAddView()" class="hourDiv"></div>
     </div>
     <add-event v-if="this.$store.state.modals.addEventModal" class="addEvent"></add-event>
     <event-info
       class="eventInfo"
-      v-if="this.$store.state.modals.eventInfoModal"
-      v-bind:event="clickedEvent"
+      v-if="this.$store.state.modals.eventInfoModal && clickedEvent"
+      v-bind:event="this.clickedEvent"
     ></event-info>
 	<update-event class="updateEvent" v-if="this.$store.state.modals.updateEventModal"  v-bind:event='clickedEvent'></update-event>
   </div>
@@ -29,7 +29,7 @@ export default {
 	},
 	date() {
 		return {
-			clickedEvent: undefined,
+			clickedEvent: false,
 		};
 	},
 	methods: {
@@ -59,6 +59,10 @@ export default {
 				const event = this.createEvent(ele, d);
 				if (event) {
 					event.id = index;
+					event.addEventListener('click', () => {
+						this.clickedEvent = this.$store.state.events[index];
+						this.$store.commit("toggleInfoEventView");
+					} )
 					const hours = new Date(ele.start).getHours() + 1;
 					const minutes = new Date(ele.start).getMinutes();
 					const durationHours =
@@ -124,12 +128,6 @@ export default {
 				return eventLabel;
 			}
 			return null;
-		},
-		clickEvent() {
-			if (event.target.id) {
-				this.clickedEvent = this.$store.state.events[event.target.id];
-				this.$store.commit("toggleInfoEventView");
-			}
 		},
 		openAddView() {
 			this.$store.commit("toggleAddEventView");

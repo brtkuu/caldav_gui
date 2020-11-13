@@ -70,7 +70,8 @@ export default {
 		},
 	},
 	mounted() {
-		this.createDates();
+		console.log(this.$store.state.modals.eventInfoModal);
+		this.createDates();	
 	},
 };
 </script>

@@ -12,6 +12,7 @@ export default new Vuex.Store({
 		currentMonth: undefined,
 		currentYear: undefined,
 		clickedDate: undefined,
+		currentWeek: undefined,
 		months: [
 			"January",
 			"February",
@@ -105,6 +106,7 @@ export default new Vuex.Store({
 				state.currentDate++;
 			}
 		},
+		
 		toggleAddEventView(state) {
 			state.modals.addEventModal = !state.modals.addEventModal;
 		},
